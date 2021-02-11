@@ -21,9 +21,18 @@ namespace ConsoleUI
         {
             CarManager carManager = new CarManager(new EfCarDal());
 
-            foreach (var car in carManager.GetCarDetails())
+            var result = carManager.GetCarDetails();
+
+            if (result.Success)
             {
-                Console.WriteLine($"{car.Description} | {car.BrandName} | {car.ColorName} | ({car.DailyPrice}$)");
+                foreach (var car in result.Data)
+                {
+                    Console.WriteLine($"{car.Description} | {car.BrandName} | {car.ColorName} | ({car.DailyPrice}$)");
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
             }
         }
 
@@ -36,9 +45,18 @@ namespace ConsoleUI
             //colorManager.Add(new Color { ColorId = 3, ColorName = "Pink Color" });
             //colorManager.Add(new Color { ColorId = 4, ColorName = "Gray Color" });
 
-            foreach (var color in colorManager.GetAll())
+            var result = colorManager.GetAll();
+
+            if (result.Success)
             {
-                Console.WriteLine($"{color.ColorName}");
+                foreach (var color in result.Data)
+                {
+                    Console.WriteLine(color.ColorId + "/" + color.ColorName);
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
             }
         }
 
@@ -46,14 +64,23 @@ namespace ConsoleUI
         {
             BrandManager brandManager = new BrandManager(new EfBrandDal());
 
-            brandManager.Add(new Brand { BrandId = 1, BrandName = "First Brand of Brands" });
-            brandManager.Add(new Brand { BrandId = 2, BrandName = "Second Brand of Brands" });
-            brandManager.Add(new Brand { BrandId = 3, BrandName = "Third Brand of Brands" });
-            brandManager.Add(new Brand { BrandId = 4, BrandName = "Fourth Brand of Brands" });
+            //brandManager.Add(new Brand { BrandId = 1, BrandName = "First Brand of Brands" });
+            //brandManager.Add(new Brand { BrandId = 2, BrandName = "Second Brand of Brands" });
+            //brandManager.Add(new Brand { BrandId = 3, BrandName = "Third Brand of Brands" });
+            //brandManager.Add(new Brand { BrandId = 4, BrandName = "Fourth Brand of Brands" });
 
-            foreach (var brand in brandManager.GetAll())
+            var result = brandManager.GetAll();
+
+            if (result.Success)
             {
-                Console.WriteLine($"{brand.BrandName}");
+                foreach (var brand in result.Data)
+                {
+                    Console.WriteLine(brand.BrandId + "/" + brand.BrandName);
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
             }
         }
 
@@ -71,10 +98,18 @@ namespace ConsoleUI
             //carManager.Add(new Car { CarId = 4, BrandId = 2, ColorId = 1, DailyPrice = 1000, Description = "e", ModelYear = 2013 });    // Error in Business (description)
             //carManager.Add(new Car { CarId = 4, BrandId = 2, ColorId = 1, DailyPrice = 0, Description = "error", ModelYear = 2013 });   // Error in Business (daily price)
 
+            var result = carManager.GetAll();
 
-            foreach (var car in carManager.GetAll())
+            if (result.Success)
             {
-                Console.WriteLine($"{car.Description} | {car.BrandId} ({car.DailyPrice}$)");
+                foreach (var car in result.Data)
+                {
+                    Console.WriteLine($"{car.Description} | {car.BrandId} | ({car.DailyPrice}$)");
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
             }
         }
     }

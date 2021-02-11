@@ -1,4 +1,6 @@
 ﻿using Business.Abstract;
+using Business.Constants;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using Entities.DTOs;
@@ -17,49 +19,90 @@ namespace Business.Concrete
             _carDal = carDal;
         }
 
-        public void Add(Car car)
+        public IResult Add(Car car)
         {
             if (!(car.Description.Length > 2) && !(car.DailyPrice > 0))
             {
-                Console.WriteLine("You need to write a explanatory description about your can be rentable car!");
-                Console.WriteLine("You need to write a realistic price for your can be rentable car! (Car Daily Price must be Greater than 0$)");
+                return new ErrorResult(Messages.MissingCarsBothFutures);
             }
             else if (!(car.Description.Length > 2) || !(car.DailyPrice > 0))
             {
                 if (!(car.Description.Length > 2))
                 {
-                    Console.WriteLine("You need to write a explanatory description about your can be rentable car!");
+                    return new ErrorResult(Messages.MissingCarsDescription);
                 }
                 else
                 {
-                    Console.WriteLine("You need to write a realistic price for your can be rentable car! (Car Daily Price must be Greater than 0$)");
+                    return new ErrorResult(Messages.MissingCarsPrice);
                 }
             }
             else
             {
                 _carDal.Add(car);
-                Console.WriteLine($"Added A New Car! ({car.Description} | {car.ModelYear} ({car.DailyPrice}$))");
+                return new SuccessResult(Messages.CarAdded);
             }
         }
 
-        public List<Car> GetAll()
+        public IResult Update(Car car)
         {
-            return _carDal.GetAll();
+            if (car.Description.Length < 2)
+            {
+                return new ErrorResult(Messages.CarIsInvalid);
+            }
+            _carDal.Update(car);
+
+            return new SuccessResult(Messages.CarAdded);
         }
 
-        public List<CarDetailDto> GetCarDetails()
+        public IResult Delete(Car car)
         {
-            return _carDal.GetCarDetails();
+            if (car.Description.Length < 2)
+            {
+                return new ErrorResult(Messages.CarIsInvalid);
+            }
+            _carDal.Delete(car);
+
+            return new SuccessResult(Messages.CarDeleted);
         }
 
-        public List<Car> GetCarsByBrandId(int brandId)
+        public IDataResult<List<Car>> GetAll()
         {
-            return _carDal.GetAll(c => c.BrandId == brandId);
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult<List<Car>>(Messages.MaintenanceTime);
+            }
+
+            return new SuccessDataResult<List<Car>>(_carDal.GetAll(), Messages.CarsListed);
         }
 
-        public List<Car> GetCarsByColorId(int colorId)
+        public IDataResult<List<CarDetailDto>> GetCarDetails()
         {
-            return _carDal.GetAll(c => c.ColorId == colorId);
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult<List<CarDetailDto>>(Messages.MaintenanceTime);
+            }
+
+            return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails());
+        }
+
+        public IDataResult<List<Car>> GetCarsByBrandId(int brandId)
+        {
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult<List<Car>>(Messages.MaintenanceTime);
+            }
+
+            return new SuccessDataResult<List<Car>>(_carDal.GetAll(c => c.BrandId == brandId));
+        }
+
+        public IDataResult<List<Car>> GetCarsByColorId(int colorId)
+        {
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult<List<Car>>(Messages.MaintenanceTime);
+            }
+
+            return new SuccessDataResult<List<Car>>(_carDal.GetAll(c => c.ColorId == colorId), Messages.CarsListed);
         }
     }
 }

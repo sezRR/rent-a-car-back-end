@@ -1,4 +1,6 @@
 ﻿using Business.Abstract;
+using Business.Constants;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using System;
@@ -16,32 +18,57 @@ namespace Business.Concrete
             _colorDal = colorDal;
         }
 
-        public void Add(Color color)
+        public IResult Add(Color color)
         {
+            if (color.ColorName.Length < 2)
+            {
+                return new ErrorResult(Messages.ColorNameInvalid);
+            }
             _colorDal.Add(color);
-            Console.WriteLine($"Added A New Color! ({color.ColorId} | {color.ColorName})");
+
+            return new SuccessResult(Messages.ColorAdded);
         }
 
-        public void Delete(Color color)
+        public IResult Update(Color color)
         {
-            _colorDal.Delete(color);
-            Console.WriteLine($"Deleted A Color! ({color.ColorId} | {color.ColorName})");
-        }
-
-        public List<Color> GetAll()
-        {
-            return _colorDal.GetAll();
-        }
-
-        public Color GetById(int colorId)
-        {
-            return _colorDal.Get(b => b.ColorId == colorId);
-        }
-
-        public void Update(Color color)
-        {
+            if (color.ColorName.Length < 2)
+            {
+                return new ErrorResult(Messages.ColorNameInvalid);
+            }
             _colorDal.Update(color);
-            Console.WriteLine($"Updated A Brand! ({color.ColorId} | {color.ColorName})");
+
+            return new SuccessResult(Messages.ColorUpdated);
+        }
+
+        public IResult Delete(Color color)
+        {
+            if (color.ColorName.Length < 2)
+            {
+                return new ErrorResult(Messages.ColorNameInvalid);
+            }
+            _colorDal.Delete(color);
+
+            return new SuccessResult(Messages.ColorDeleted);
+        }
+
+        public IDataResult<List<Color>> GetAll()
+        {
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult<List<Color>>(Messages.MaintenanceTime);
+            }
+
+            return new SuccessDataResult<List<Color>>(_colorDal.GetAll(), Messages.ColorsListed);
+        }
+
+        public IDataResult<Color> GetById(int colorId)
+        {
+            if (DateTime.Now.Hour == 22)
+            {
+                return new ErrorDataResult<Color>(Messages.MaintenanceTime);
+            }
+
+            return new SuccessDataResult<Color>(_colorDal.Get(b => b.ColorId == colorId));
         }
     }
 }
