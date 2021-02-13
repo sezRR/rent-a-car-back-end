@@ -14,7 +14,200 @@ namespace ConsoleUI
             //BrandTest();
             //ColorTest();
 
-            CarDetailsTest();
+            //CarDetailsTest();
+
+            //CustomerTest();
+            //UserTest();
+
+            //RentalTest();
+
+            RentalDetailsTest();
+        }
+
+        private static void RentalDetailsTest()
+        {
+            RentalManager rentalManager = new RentalManager(new EfRentalDal());
+
+            var result = rentalManager.GetRentalDetails();
+
+            if (result.Success)
+            {
+                foreach (var rental in result.Data)
+                {
+                    Console.WriteLine($"{rental.Id} | {rental.UserName} | {rental.CustomerName} | {rental.Description} | {rental.RentDate} | {rental.ReturnDate} (Rental Id - UserName - CustomerName - Description - RentDate - ReturnDate)");
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
+            }
+        }
+
+        private static void RentalTest()
+        {
+            RentalManager rentalManager = new RentalManager(new EfRentalDal());
+
+            //Rental rental1 = new Rental
+            //{
+            //    CarId = 1,
+            //    CustomerId = 1,
+            //    RentDate = new DateTime(2021, 02, 13),
+            //    ReturnDate = new DateTime(2021, 02, 20)
+            //};
+
+            //Rental rental2 = new Rental
+            //{
+            //    CarId = 3,
+            //    CustomerId = 1,
+            //    RentDate = new DateTime(2021, 02, 21),
+            //    ReturnDate = new DateTime(2021, 02, 26)
+            //};
+
+            //Rental rental3 = new Rental
+            //{
+            //    CarId = 2,
+            //    CustomerId = 2,
+            //    RentDate = new DateTime(2021, 02, 16),
+            //    ReturnDate = new DateTime(2021, 02, 25)
+            //};
+
+            //rentalManager.Add(rental1);
+            //rentalManager.Add(rental2);
+            //rentalManager.Add(rental3);
+
+            var result = rentalManager.GetAll();
+
+            if (result.Success)
+            {
+                foreach (var rental in result.Data)
+                {
+                    Console.WriteLine($"{rental.Id} | {rental.CarId} | {rental.CustomerId} | {rental.RentDate} | {rental.ReturnDate} (RentalId - CarId - CustomerId - RentDate - ReturnDate)");
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
+            }
+        }
+
+        private static void UserTest()
+        {
+            UserManager userManager = new UserManager(new EfUserDal());
+
+            //User user1 = new User
+            //{
+            //    FirstName = "Faruk",
+            //    LastName = "Demir",
+            //    Email = "farukdemir@email.com",
+            //    Password = "farukdemir123"
+            //};
+
+            //User user2 = new User
+            //{
+            //    FirstName = "Necmi",
+            //    LastName = "Uzungil",
+            //    Email = "necmiuzungil@email.com",
+            //    Password = "necmiuzungil123"
+            //};
+
+            //User user3 = new User
+            //{
+            //    FirstName = "Haluk",
+            //    LastName = "Kaya",
+            //    Email = "halukkaya@email.com",
+            //    Password = "halukkaya123"
+            //};
+
+            //User user4 = new User
+            //{
+            //    FirstName = "Ertan",
+            //    LastName = "Tuğ",
+            //    Email = "ertantug@email.com",
+            //    Password = "ertantug123"
+            //};
+
+            //User user5 = new User
+            //{
+            //    FirstName = "Veli",
+            //    LastName = "Denk",
+            //    Email = "velidenk@email.com",
+            //    Password = "velidenk123"
+            //};
+
+            //userManager.Add(user1);
+            //userManager.Add(user2);
+            //userManager.Add(user3);
+            //userManager.Add(user4);
+            //userManager.Add(user5);
+
+            var result = userManager.GetAll();
+
+            if (result.Success)
+            {
+                foreach (var user in result.Data)
+                {
+                    Console.WriteLine($"{user.Id} | {user.FirstName} | {user.LastName} | {user.Email} (Id - FirstName - LastName - Email)");
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
+            }
+        }
+
+        private static void CustomerTest()
+        {
+            CustomerManager customerManager = new CustomerManager(new EfCustomerDal());
+
+            //Customer customer1 = new Customer
+            //{
+            //    UserId = 1,
+            //    CompanyName = "Company1"
+            //};
+
+            //Customer customer2 = new Customer
+            //{
+            //    UserId = 1,
+            //    CompanyName = "Company1.2"
+            //};
+
+            //Customer customer3 = new Customer
+            //{
+            //    UserId = 2,
+            //    CompanyName = "Company2"
+            //};
+
+            //Customer customer4 = new Customer
+            //{
+            //    UserId = 3,
+            //    CompanyName = "Company3"
+            //};
+
+            //Customer customer5 = new Customer
+            //{
+            //    UserId = 4,
+            //    CompanyName = "Company4"
+            //};
+
+            //customerManager.Add(customer1);
+            //customerManager.Add(customer2);
+            //customerManager.Add(customer3);
+            //customerManager.Add(customer4);
+            //customerManager.Add(customer5);
+
+            var result = customerManager.GetAll();
+
+            if (result.Success)
+            {
+                foreach (var car in result.Data)
+                {
+                    Console.WriteLine($"{car.Id} | {car.UserId} | {car.CompanyName} (Id - UserId - CompanyName)");
+                }
+            }
+            else
+            {
+                Console.WriteLine(result.Message);
+            }
         }
 
         private static void CarDetailsTest()
