@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Entities.Concrete;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -46,5 +47,11 @@ namespace Business.Constants
         public static string CarImageLimitReached = "You can not add more picture about your car. You reached limit of the car images (can only upload 5 images to a car)";
 
         public static string MaintenanceTime = "Servers in Maintenance (Time)";
+        public static string UserNotFound = "User not found";
+        public static string PasswordError = "Password is wrong";
+        public static string SuccessfulLogin = "Logged in to system successfully";
+        public static string UserAlreadyExists = "User already registered";
+        public static string UserRegistered = "User registered to the system successfully";
+        public static string AccessTokenCreated = "Access Token Created";
     }
 }
