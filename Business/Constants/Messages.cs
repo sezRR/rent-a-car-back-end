@@ -1,6 +1,7 @@
 ﻿using Core.Entities.Concrete;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Business.Constants
@@ -15,6 +16,7 @@ namespace Business.Constants
 
         public static string CarsListed = "Cars Listed";
         public static string CarAdded = "Car Added";
+        public static string CarUpdated = "Car Updated";
         public static string CarDeleted = "Car Deleted";
         public static string CarIsInvalid = "Car is Invalid";
         public static string MissingCarsBothFutures = "You need to write a explanatory description about your can be rentable car and You need to write a realistic price for your can be rentable car! (Car Daily Price must be Greater than 0$)";
@@ -53,5 +55,7 @@ namespace Business.Constants
         public static string UserAlreadyExists = "User already registered";
         public static string UserRegistered = "User registered to the system successfully";
         public static string AccessTokenCreated = "Access Token Created";
+
+        public static string AuthorizationDenied = "You do not have permission";
     }
 }
