@@ -50,7 +50,7 @@ namespace Business.Concrete
             return new SuccessResult(Messages.CarDeleted);
         }
 
-        [SecuredOperation("car.list")]
+        //[SecuredOperation("car.list")]
         [PerformanceAspect(5)]
         public IDataResult<List<Car>> GetAll()
         {
