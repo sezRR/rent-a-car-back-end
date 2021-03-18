@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Core.Utilities.FileHelper
 {
@@ -63,9 +64,6 @@ namespace Core.Utilities.FileHelper
             string fileExtension = fileInfo.Extension;
 
             var uniqueFileName = 
-                DateTime.Now.Month + "-" +
-                DateTime.Now.Day + "-" + 
-                DateTime.Now.Year + "-" + 
                 Guid.NewGuid().ToString("N") +
                 fileExtension;
 

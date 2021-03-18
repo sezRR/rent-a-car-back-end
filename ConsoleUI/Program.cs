@@ -34,7 +34,7 @@ namespace ConsoleUI
             {
                 foreach (var rental in result.Data)
                 {
-                    Console.WriteLine($"{rental.Id} | {rental.UserName} | {rental.CustomerName} | {rental.Description} | {rental.RentDate} | {rental.ReturnDate} (Rental Id - UserName - CustomerName - Description - RentDate - ReturnDate)");
+                    //Console.WriteLine($"{rental.Id} | {rental.UserName} | {rental.CustomerName} | {rental.Description} | {rental.RentDate} | {rental.ReturnDate} (Rental Id - UserName - CustomerName - Description - RentDate - ReturnDate)");
                 }
             }
             else

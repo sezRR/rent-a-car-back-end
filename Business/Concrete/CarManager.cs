@@ -54,7 +54,7 @@ namespace Business.Concrete
         [PerformanceAspect(5)]
         public IDataResult<List<Car>> GetAll()
         {
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
             return new SuccessDataResult<List<Car>>(_carDal.GetAll(), Messages.CarsListed);
         }
 
@@ -64,14 +64,14 @@ namespace Business.Concrete
         }
 
         [CacheAspect(duration: 10)]
-        public IDataResult<List<Car>> GetCarsByBrandId(int brandId)
+        public IDataResult<List<CarDetailDto>> GetCarsByBrandId(int brandId)
         {
-            return new SuccessDataResult<List<Car>>(_carDal.GetAll(c => c.BrandId == brandId));
+            return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails(c => c.BrandId == brandId));
         }
 
-        public IDataResult<List<Car>> GetCarsByColorId(int colorId)
+        public IDataResult<List<CarDetailDto>> GetCarsByColorId(int colorId)
         {
-            return new SuccessDataResult<List<Car>>(_carDal.GetAll(c => c.ColorId == colorId), Messages.CarsListed);
+            return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails(c => c.ColorId == colorId), Messages.CarsListed);
         }
 
         [TransactionScopeAspect]
@@ -80,6 +80,12 @@ namespace Business.Concrete
             _carDal.Update(car);
             _carDal.Add(car);
             return new SuccessResult(Messages.CarUpdated);
+        }
+
+        public IDataResult<CarDetailDto> GetCarDetailsById(int id)
+        {
+            return new SuccessDataResult<CarDetailDto>(_carDal.GetCarDetailsById(c => c.Id == id));
+
         }
     }
 }
