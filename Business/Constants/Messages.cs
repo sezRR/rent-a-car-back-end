@@ -1,4 +1,5 @@
 ﻿using Core.Entities.Concrete;
+using Entities.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -22,6 +23,8 @@ namespace Business.Constants
         public static string MissingCarsBothFutures = "You need to write a explanatory description about your can be rentable car and You need to write a realistic price for your can be rentable car! (Car Daily Price must be Greater than 0$)";
         public static string MissingCarsDescription = "You need to write a explanatory description about your can be rentable car!";
         public static string MissingCarsPrice = "You need to write a realistic price for your can be rentable car! (Car Daily Price must be Greater than 0$)";
+        public static string TheCarNotFound = "Desired car is not on the database";
+        public static string CarNotAvailable = "This car already rentaled by someone";
 
         public static string ColorsListed = "Colors Listed";
         public static string ColorAdded = "Color Added";
@@ -57,5 +60,8 @@ namespace Business.Constants
         public static string AccessTokenCreated = "Access Token Created";
 
         public static string AuthorizationDenied = "You do not have permission";
+
+        public static string PaymentFailed = "Payment failed";
+        public static string PaymentSuccessful = "Payment successful";
     }
 }

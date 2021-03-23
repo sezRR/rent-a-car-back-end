@@ -16,23 +16,31 @@ namespace DataAccess.Concrete.EntityFramework
         {
             using (RentingCarContext context = new RentingCarContext())
             {
-                var result = from r in filter is null ? context.Rentals : context.Rentals.Where(filter)
-                             join ca in context.Cars
-                             on r.CarId equals ca.CarId
-                             join cu in context.Customers
-                             on r.CustomerId equals cu.Id
-                             join u in context.Users
-                             on cu.UserId equals u.Id
-                             select new RentalDetailDto
-                             {
-                                 Id = r.Id,
-                                 Description = ca.Description,
-                                 CompanyName = cu.CompanyName,
-                                 CarId = ca.CarId,
-                                 RentDate = r.RentDate,
-                                 ReturnDate = r.ReturnDate,
-                                 UserName = u.FirstName + " " + u.LastName
-                             };
+                var result =
+                    from rental in filter == null ? context.Rentals : context.Rentals.Where(filter)
+                    join customer in context.Customers
+                        on rental.CustomerId equals customer.Id
+                    join user in context.Users
+                         on customer.UserId equals user.Id
+                    join car in context.Cars
+                         on rental.CarId equals car.Id
+                    join brand in context.Brands
+                         on car.BrandId equals brand.BrandId
+                    join color in context.Colors
+                         on car.ColorId equals color.ColorId
+                    select new RentalDetailDto
+                    {
+                        RentDate = rental.RentDate,
+                        ReturnDate = rental.ReturnDate,
+                        RentalId = rental.Id,
+                        BrandName = brand.BrandName,
+                        Description = car.Description,
+                        ColorName = color.ColorName,
+                        CompanyName = customer.CompanyName,
+                        DailyPrice = car.DailyPrice,
+                        UserName = user.FirstName,
+                        ModelYear = car.ModelYear
+                    };
 
                 return result.ToList();
             }
