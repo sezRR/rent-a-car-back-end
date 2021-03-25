@@ -244,7 +244,7 @@ namespace ConsoleUI
             {
                 foreach (var color in result.Data)
                 {
-                    Console.WriteLine(color.ColorId + "/" + color.ColorName);
+                    Console.WriteLine(color.Id + "/" + color.ColorName);
                 }
             }
             else
@@ -268,7 +268,7 @@ namespace ConsoleUI
             {
                 foreach (var brand in result.Data)
                 {
-                    Console.WriteLine(brand.BrandId + "/" + brand.BrandName);
+                    Console.WriteLine(brand.Id + "/" + brand.BrandName);
                 }
             }
             else

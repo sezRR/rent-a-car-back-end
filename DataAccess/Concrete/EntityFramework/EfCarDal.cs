@@ -19,19 +19,19 @@ namespace DataAccess.Concrete.EntityFramework
             {
                 var result = from c in filter is null ? context.Cars : context.Cars.Where(filter)
                              join b in context.Brands
-                             on c.BrandId equals b.BrandId
+                             on c.BrandId equals b.Id
                              join co in context.Colors
-                             on c.ColorId equals co.ColorId
+                             on c.ColorId equals co.Id
                              select new CarDetailDto
                              {
                                  Id = c.Id,
-                                 CarId = c.CarId,
+                                 CarId = c.Id,
                                  BrandName = b.BrandName,
                                  Description = c.Description,
                                  ModelYear = c.ModelYear,
                                  ColorName = co.ColorName,
                                  DailyPrice = c.DailyPrice,
-                                 ImagePath = (from a in context.CarImages where a.CarId == c.CarId select a.ImagePath).FirstOrDefault()
+                                 ImagePath = (from a in context.CarImages where a.CarId == c.Id select a.ImagePath).FirstOrDefault()
                              };
 
                 return result.ToList();
@@ -44,19 +44,19 @@ namespace DataAccess.Concrete.EntityFramework
             {
                 var result = from c in filter is null ? context.Cars : context.Cars.Where(filter)
                              join b in context.Brands
-                             on c.BrandId equals b.BrandId
+                             on c.BrandId equals b.Id
                              join co in context.Colors
-                             on c.ColorId equals co.ColorId
+                             on c.ColorId equals co.Id
                              select new CarDetailDto
                              {
                                  Id = c.Id,
-                                 CarId = c.CarId,
+                                 CarId = c.Id,
                                  BrandName = b.BrandName,
                                  Description = c.Description,
                                  ModelYear = c.ModelYear,
                                  ColorName = co.ColorName,
                                  DailyPrice = c.DailyPrice,
-                                 ImagePath = (from a in context.CarImages where a.CarId == c.CarId select a.ImagePath).FirstOrDefault()
+                                 ImagePath = (from a in context.CarImages where a.CarId == c.Id select a.ImagePath).FirstOrDefault()
                              };
 
                 return result.FirstOrDefault();

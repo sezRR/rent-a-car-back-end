@@ -67,7 +67,7 @@ namespace Business.Concrete
                 return new ErrorDataResult<Color>(Messages.MaintenanceTime);
             }
 
-            return new SuccessDataResult<Color>(_colorDal.Get(b => b.ColorId == colorId));
+            return new SuccessDataResult<Color>(_colorDal.Get(b => b.Id == colorId));
         }
     }
 }

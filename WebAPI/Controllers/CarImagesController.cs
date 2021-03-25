@@ -71,7 +71,7 @@ namespace WebAPI.Controllers
             }
             if (file == null)
             {
-                carImage.ImagePath = path + "default.png";
+                carImage.ImagePath = "default.png";
             }
             var newGuidPath = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
             using (FileStream fileStream = System.IO.File.Create(path + newGuidPath))
