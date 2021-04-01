@@ -56,7 +56,8 @@ namespace Business.Concrete
                 Email = userForRegisterDto.Email,
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
-                Status = true
+                Status = true,
+                FindeksRating = userForRegisterDto.FindeksRating,
             };
 
             _userService.Add(user);

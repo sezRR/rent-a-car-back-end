@@ -40,7 +40,7 @@ namespace Business.Constants
 
         public static string UsersListed = "Users Listed";
         public static string UserAdded = "User Added";
-        public static string UserUpdated = "User Updated";
+        public static string UserUpdated = "Your settings successfully updated";
         public static string UserDeleted = "User Deleted";
         public static string UserFirstNameInvalid = "User First Name is Invalid";
 
@@ -63,5 +63,7 @@ namespace Business.Constants
 
         public static string PaymentFailed = "Payment failed";
         public static string PaymentSuccessful = "Payment successful";
+
+        public static string FindeksRatingCalculated = "Findeks rating calculated successfully";
     }
 }

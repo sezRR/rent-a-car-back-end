@@ -31,6 +31,7 @@ namespace DataAccess.Concrete.EntityFramework
                                  ModelYear = c.ModelYear,
                                  ColorName = co.ColorName,
                                  DailyPrice = c.DailyPrice,
+                                 MinimumFindeksRating = c.MinimumFindeksRating,
                                  ImagePath = (from a in context.CarImages where a.CarId == c.Id select a.ImagePath).FirstOrDefault()
                              };
 
@@ -56,6 +57,7 @@ namespace DataAccess.Concrete.EntityFramework
                                  ModelYear = c.ModelYear,
                                  ColorName = co.ColorName,
                                  DailyPrice = c.DailyPrice,
+                                 MinimumFindeksRating = c.MinimumFindeksRating,
                                  ImagePath = (from a in context.CarImages where a.CarId == c.Id select a.ImagePath).FirstOrDefault()
                              };
 

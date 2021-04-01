@@ -11,6 +11,8 @@ namespace Business.Concrete
     {
         public IResult Pay()
         {
+            // In our database we not keep informations about credit cards so i added algorithmic operation
+
             var test = new Random().Next(2);
             if (test != 1)
             {
