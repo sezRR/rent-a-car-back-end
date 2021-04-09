@@ -77,5 +77,10 @@ namespace DataAccess.Concrete.InMemory
         {
             throw new NotImplementedException();
         }
+
+        public void Delete(int entityId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

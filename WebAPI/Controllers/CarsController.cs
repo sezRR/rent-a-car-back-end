@@ -1,6 +1,5 @@
 ﻿using Business.Abstract;
 using Entities.Concrete;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -97,10 +96,32 @@ namespace WebAPI.Controllers
             return BadRequest(result);
         }
 
+        [HttpPost("addreturnabledata")]
+        public IActionResult AddReturnableData(Car car)
+        {
+            var result = _carService.AddReturnableData(car);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
         [HttpPost("update")]
         public IActionResult Update(Car car)
         {
             var result = _carService.Update(car);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpPost("delete")]
+        public IActionResult Delete(Car car)
+        {
+            var result = _carService.Delete(car);
             if (result.Success)
             {
                 return Ok(result);

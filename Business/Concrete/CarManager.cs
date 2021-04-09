@@ -99,5 +99,12 @@ namespace Business.Concrete
                 return new SuccessDataResult<List<CarDetailDto>>(cars);
             }
         }
+
+        public IDataResult<Car> AddReturnableData(Car car)
+        {
+            _carDal.Add(car);
+
+            return new SuccessDataResult<Car>(car);
+        }
     }
 }

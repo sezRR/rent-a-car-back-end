@@ -92,7 +92,7 @@ namespace ConsoleUI
 
         private static void UserTest()
         {
-            UserManager userManager = new UserManager(new EfUserDal());
+            //UserManager userManager = new UserManager(new EfUserDal());
 
             //User user1 = new User
             //{
@@ -140,19 +140,19 @@ namespace ConsoleUI
             //userManager.Add(user4);
             //userManager.Add(user5);
 
-            var result = userManager.GetAll();
+            //var result = userManager.GetAll();
 
-            if (result.Success)
-            {
-                foreach (var user in result.Data)
-                {
-                    Console.WriteLine($"{user.Id} | {user.FirstName} | {user.LastName} | {user.Email} (Id - FirstName - LastName - Email)");
-                }
-            }
-            else
-            {
-                Console.WriteLine(result.Message);
-            }
+            //if (result.Success)
+            //{
+            //    foreach (var user in result.Data)
+            //    {
+            //        Console.WriteLine($"{user.Id} | {user.FirstName} | {user.LastName} | {user.Email} (Id - FirstName - LastName - Email)");
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine(result.Message);
+            //}
         }
 
         private static void CustomerTest()

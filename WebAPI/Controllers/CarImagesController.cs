@@ -60,7 +60,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add")]
-        public IActionResult Add([FromForm] CarImage carImage, [FromForm(Name = ("CarImage"))] IFormFile file)
+        public IActionResult Add([FromForm(Name = "carId")] string carId, [FromForm(Name ="file")] IFormFile file)
         {
             string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
 
@@ -68,10 +68,6 @@ namespace WebAPI.Controllers
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
-            }
-            if (file == null)
-            {
-                carImage.ImagePath = "default.png";
             }
             var newGuidPath = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
             using (FileStream fileStream = System.IO.File.Create(path + newGuidPath))
@@ -82,7 +78,7 @@ namespace WebAPI.Controllers
 
             var result = _carImageService.Add(new CarImage
             {
-                CarId = carImage.CarId,
+                CarId = Convert.ToInt32(carId),
                 Date = DateTime.Now,
                 ImagePath = newGuidPath
             });
@@ -106,7 +102,7 @@ namespace WebAPI.Controllers
 
 
         [HttpPost("delete")]
-        public IActionResult Delete([FromForm] int id)
+        public IActionResult Delete(int id)
         {
             var carImage = _carImageService.GetById(id).Data;
 
