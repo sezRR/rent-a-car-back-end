@@ -4,6 +4,7 @@ using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
 using Core.Utilities.Business;
 using Core.Utilities.FileHelper;
+using Core.Utilities.FileOperations;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
@@ -26,16 +27,25 @@ namespace Business.Concrete
         }
 
         //[ValidationAspect(typeof(CarImageValidator))]
-        public IResult Add(CarImage carImage)
+        public IResult Add(CarImage carImage, IFormFile file, string path)
         {
-            //IResult result = BusinessRules.Run(CheckIfReachCarImageLimit(carImage.CarId));
+            var result = BusinessRules.Run(CheckIfReachCarImageLimit(carImage.CarId));
 
-            //if (result != null)
-            //{
-            //    return result;
-            //}
+            if (result != null)
+            {
+                return result;
+            }
 
-            carImage.Date = DateTime.Now;
+            var isCarImageDefault = FileOperations.CheckCarImageDefaultOrNot(file, path);
+
+            if (isCarImageDefault.Success)
+            {
+                carImage.ImagePath = isCarImageDefault.Data;
+            }
+            else
+            {
+                carImage.ImagePath = isCarImageDefault.Data;
+            }
 
             _carImageDal.Add(carImage);
 
@@ -45,7 +55,7 @@ namespace Business.Concrete
         [ValidationAspect(typeof(CarImageValidator))]
         public IResult Update(CarImage carImage, IFormFile file)
         {
-            carImage.ImagePath = FileHelper.Update(file, _carImageDal.Get(p => p.Id == carImage.Id).ImagePath);
+            //carImage.ImagePath = FileHelper.Update(file, _carImageDal.Get(p => p.Id == carImage.Id).ImagePath);
             carImage.Date = DateTime.Now;
 
             _carImageDal.Update(carImage);
@@ -53,11 +63,19 @@ namespace Business.Concrete
             return new SuccessResult();
         }
 
-        public IResult Delete(CarImage carImage)
+        public IResult Delete(CarImage carImage, string path)
         {
-            FileHelper.Delete(_carImageDal.Get(c => c.Id == carImage.Id).ImagePath);
+            if (carImage.ImagePath == "default.png")
+            {
+                _carImageDal.Delete(carImage);
+            }
+            else
+            {
+                FileHelper.Delete(carImage.ImagePath, path);
 
-            _carImageDal.Delete(carImage);
+                _carImageDal.Delete(carImage);
+            }
+
             return new SuccessResult();
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Core.Utilities.Results;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
 
@@ -6,28 +7,20 @@ namespace Core.Utilities.FileOperations
 {
     public static class FileOperations
     {
-        public static string ImagePath { get; set; }
-
-        public static string SaveImageFile(IFormFile imageFile)
+        public static DataResult<string> CheckCarImageDefaultOrNot(IFormFile file, string path)
         {
-            string newImageName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-            var fullPath = Path.Combine(ImagePath, newImageName);
-            using (var stream = new FileStream(fullPath, FileMode.Create))
+            if (file == null)
             {
-                imageFile.CopyTo(stream);
+                return new SuccessDataResult<string>("default.png","");
             }
-            return newImageName;
+
+            return new ErrorDataResult<string>(AddCarImage(file, path),"");
         }
 
-        public static bool DeleteImageFile(string fileName)
+        public static string AddCarImage(IFormFile file, string path)
         {
-            string fullPath = Path.Combine(ImagePath, fileName);
-            if (File.Exists(fullPath))
-            {
-                File.Delete(fullPath);
-                return true;
-            }
-            return false;
+            var fileName = FileHelper.FileHelper.Add(file, path);
+            return fileName;
         }
     }
 }

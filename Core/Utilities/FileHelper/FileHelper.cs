@@ -10,8 +10,12 @@ namespace Core.Utilities.FileHelper
 {
     public class FileHelper
     {
-        public static string Add(IFormFile file)
+        public static string Add(IFormFile file, string path)
         {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             var sourcePath = Path.GetTempFileName();
             if (file.Length > 0)
             {
@@ -22,13 +26,17 @@ namespace Core.Utilities.FileHelper
             }
 
             var result = NewPath(file);
-            File.Move(sourcePath, result);
+            File.Move(sourcePath, path+result);
 
             return result;
         }
 
-        public static string Update(IFormFile file, string sourcePath)
+        public static string Update(IFormFile file, string sourcePath, string path)
         {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
             var result = NewPath(file);
 
             if (sourcePath.Length > 0)
@@ -44,15 +52,9 @@ namespace Core.Utilities.FileHelper
             return result;
         }
 
-        public static IResult Delete(string sourcePath)
+        public static IResult Delete(string fileName, string path)
         {
-            var file = Directory.GetFiles(sourcePath).Length;
-
-            if (file == 0)
-            {
-                return new ErrorResult();
-            }
-
+            var sourcePath = path + fileName;
             File.Delete(sourcePath);
 
             return new SuccessResult();
@@ -67,9 +69,7 @@ namespace Core.Utilities.FileHelper
                 Guid.NewGuid().ToString("N") +
                 fileExtension;
 
-            string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName + @"\CarImages");
-
-            string result = $@"{path}\{uniqueFileName}";
+            string result = $@"{uniqueFileName}";
 
             return result;
         }

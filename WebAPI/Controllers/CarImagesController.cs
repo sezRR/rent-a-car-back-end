@@ -60,28 +60,12 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add")]
-        public IActionResult Add([FromForm(Name = "carId")] string carId, [FromForm(Name ="file")] IFormFile file)
+        public IActionResult Add([FromForm(Name = "carId")] string carId, [FromForm(Name = "file")] IFormFile file)
         {
             string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
 
+            var result = _carImageService.Add(new CarImage { CarId = Convert.ToInt32(carId), Date = DateTime.Now }, file, path);
 
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            var newGuidPath = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            using (FileStream fileStream = System.IO.File.Create(path + newGuidPath))
-            {
-                file.CopyTo(fileStream);
-                fileStream.Flush();
-            }
-
-            var result = _carImageService.Add(new CarImage
-            {
-                CarId = Convert.ToInt32(carId),
-                Date = DateTime.Now,
-                ImagePath = newGuidPath
-            });
             if (result.Success)
             {
                 return Ok(result);
@@ -104,14 +88,32 @@ namespace WebAPI.Controllers
         [HttpPost("delete")]
         public IActionResult Delete(int id)
         {
-            var carImage = _carImageService.GetById(id).Data;
+            string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
 
-            var result = _carImageService.Delete(carImage);
-            if (result.Success)
+            var carImages = _carImageService.GetByCarId(id).Data;
+
+            if (carImages.Count == 0)
             {
-                return Ok(result);
+                return BadRequest("This car do not have image!");
             }
-            return BadRequest(result);
+
+            List<IResult> results = new List<IResult>();
+
+            foreach (var carImage in carImages)
+            {
+                var result = _carImageService.Delete(carImage, path);
+                results.Add(result);     
+            }
+
+            foreach (var result in results)
+            {
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+            }
+
+            return Ok(results[0]);
         }
     }
 }

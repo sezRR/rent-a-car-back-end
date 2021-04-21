@@ -52,20 +52,20 @@ namespace Business.Concrete
 
         public IDataResult<List<Color>> GetAll()
         {
-            if (DateTime.Now.Hour == 22)
-            {
-                return new ErrorDataResult<List<Color>>(Messages.MaintenanceTime);
-            }
+            //if (DateTime.Now.Hour == 22)
+            //{
+            //    return new ErrorDataResult<List<Color>>(Messages.MaintenanceTime);
+            //}
 
             return new SuccessDataResult<List<Color>>(_colorDal.GetAll(), Messages.ColorsListed);
         }
 
         public IDataResult<Color> GetById(int colorId)
         {
-            if (DateTime.Now.Hour == 22)
-            {
-                return new ErrorDataResult<Color>(Messages.MaintenanceTime);
-            }
+            //if (DateTime.Now.Hour == 22)
+            //{
+            //    return new ErrorDataResult<Color>(Messages.MaintenanceTime);
+            //}
 
             return new SuccessDataResult<Color>(_colorDal.Get(b => b.Id == colorId));
         }
