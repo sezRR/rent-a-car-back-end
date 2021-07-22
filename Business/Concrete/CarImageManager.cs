@@ -36,16 +36,7 @@ namespace Business.Concrete
                 return result;
             }
 
-            var isCarImageDefault = FileOperations.CheckCarImageDefaultOrNot(file, path);
-
-            if (isCarImageDefault.Success)
-            {
-                carImage.ImagePath = isCarImageDefault.Data;
-            }
-            else
-            {
-                carImage.ImagePath = isCarImageDefault.Data;
-            }
+            carImage.ImagePath = FileOperations.CheckCarImageDefaultOrNot(file, path).Data;
 
             _carImageDal.Add(carImage);
 
@@ -111,7 +102,7 @@ namespace Business.Concrete
         private IResult CheckIfReachCarImageLimit(int carId)
         {
             var countOfCarImages = _carImageDal.GetAll(c => c.CarId == carId).Count;
-            if (!(countOfCarImages >= 5))
+            if (!(countOfCarImages > 5))
             {
                 return new SuccessResult();
             }

@@ -14,7 +14,7 @@ namespace Core.Utilities.FileOperations
                 return new SuccessDataResult<string>("default.png","");
             }
 
-            return new ErrorDataResult<string>(AddCarImage(file, path),"");
+            return new ErrorDataResult<string>(AddCarImage(file, path), "CarImage");
         }
 
         public static string AddCarImage(IFormFile file, string path)
