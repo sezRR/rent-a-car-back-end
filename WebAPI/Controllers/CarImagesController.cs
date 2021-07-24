@@ -74,7 +74,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("update")]
-        public IActionResult Update([FromForm] IFormFile objectFile, CarImage carImage)
+        public IActionResult Update([FromForm(Name = "objectFile")] IFormFile objectFile, CarImage carImage)
         {
             var result = _carImageService.Update(carImage, objectFile);
             if (result.Success)
@@ -85,7 +85,7 @@ namespace WebAPI.Controllers
         }
 
 
-        [HttpPost("delete")]
+        [HttpDelete("delete")]
         public IActionResult Delete(int id)
         {
             string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
