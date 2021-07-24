@@ -74,9 +74,11 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("update")]
-        public IActionResult Update([FromForm(Name = "objectFile")] IFormFile objectFile, CarImage carImage)
+        public IActionResult Update([FromForm(Name = "objectFile")] IFormFile objectFile, [FromForm(Name = "carImage")] CarImage carImage)
         {
-            var result = _carImageService.Update(carImage, objectFile);
+            string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
+
+            var result = _carImageService.Update(carImage, objectFile, path);
             if (result.Success)
             {
                 return Ok(result);

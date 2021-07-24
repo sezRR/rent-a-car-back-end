@@ -44,9 +44,9 @@ namespace Business.Concrete
         }
 
         [ValidationAspect(typeof(CarImageValidator))]
-        public IResult Update(CarImage carImage, IFormFile file)
+        public IResult Update(CarImage carImage, IFormFile file, string path)
         {
-            //carImage.ImagePath = FileHelper.Update(file, _carImageDal.Get(p => p.Id == carImage.Id).ImagePath);
+            carImage.ImagePath = FileHelper.Update(file, carImage.ImagePath, path);
             carImage.Date = DateTime.Now;
 
             _carImageDal.Update(carImage);

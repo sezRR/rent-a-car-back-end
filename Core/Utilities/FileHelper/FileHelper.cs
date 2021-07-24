@@ -31,25 +31,13 @@ namespace Core.Utilities.FileHelper
             return result;
         }
 
-        public static string Update(IFormFile file, string sourcePath, string path)
+        public static string Update(IFormFile file, string oldPath, string path)
         {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            var result = NewPath(file);
+            var newImagePath = Add(file, path);
 
-            if (sourcePath.Length > 0)
-            {
-                using (var stream = new FileStream(result, FileMode.Create))
-                {
-                    file.CopyTo(stream);
-                }
-            }
+            File.Delete(path+oldPath);
 
-            File.Delete(sourcePath);
-
-            return result;
+            return newImagePath;
         }
 
         public static IResult Delete(string fileName, string path)
