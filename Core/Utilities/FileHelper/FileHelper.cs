@@ -1,5 +1,6 @@
 ﻿using Core.Utilities.Results;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,8 +11,12 @@ namespace Core.Utilities.FileHelper
 {
     public class FileHelper
     {
-        public static string Add(IFormFile file, string path)
+        public static IConfiguration Configuration { get; set; }
+
+        public static string Add(IFormFile file, ref string path)
         {
+            CheckPathValue(ref path);
+
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -19,10 +24,8 @@ namespace Core.Utilities.FileHelper
             var sourcePath = Path.GetTempFileName();
             if (file.Length > 0)
             {
-                using (var stream = new FileStream(sourcePath, FileMode.Create))
-                {
-                    file.CopyTo(stream);
-                }
+                using var stream = new FileStream(sourcePath, FileMode.Create);
+                file.CopyTo(stream);
             }
 
             var result = NewPath(file);
@@ -31,9 +34,11 @@ namespace Core.Utilities.FileHelper
             return result;
         }
 
-        public static string Update(IFormFile file, string oldPath, string path)
+        public static string Update(IFormFile file, string oldPath, ref string path)
         {
-            var newImagePath = Add(file, path);
+            //path = CheckPathValue(ref path);
+
+            var newImagePath = Add(file, ref path);
 
             File.Delete(path+oldPath);
 
@@ -60,6 +65,12 @@ namespace Core.Utilities.FileHelper
             string result = $@"{uniqueFileName}";
 
             return result;
+        }
+
+        public static string CheckPathValue(ref string path)
+        {
+            path ??= Path.GetFullPath(Configuration["Paths:DefaultCarImagePath"]);
+            return path;
         }
     }
 }

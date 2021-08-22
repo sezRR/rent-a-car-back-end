@@ -1,5 +1,6 @@
 using Core.DependencyResolvers;
 using Core.Extensions;
+using Core.Utilities.FileHelper;
 using Core.Utilities.FileOperations;
 using Core.Utilities.IoC;
 using Core.Utilities.Security.Encryption;
@@ -20,6 +21,7 @@ namespace WebAPI
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            FileHelper.Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }

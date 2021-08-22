@@ -17,13 +17,13 @@ namespace WebAPI.Controllers
     [ApiController]
     public class CarImagesController : ControllerBase
     {
-        public static IWebHostEnvironment _webHostEnvironment;
-        ICarImageService _carImageService;
+        public IWebHostEnvironment WebHostEnvironment { get; set; }
+        private readonly ICarImageService _carImageService;
 
         public CarImagesController(ICarImageService carImageService, IWebHostEnvironment webHostEnvironment)
         {
             _carImageService = carImageService;
-            _webHostEnvironment = webHostEnvironment;
+            WebHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet("getall")]
@@ -60,10 +60,8 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add")]
-        public IActionResult Add([FromForm(Name = "carId")] string carId, [FromForm(Name = "file")] IFormFile file)
+        public IActionResult Add([FromForm(Name = "carId")] string carId, [FromForm(Name = "file")] IFormFile file, string path = null)
         {
-            string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
-
             var result = _carImageService.Add(new CarImage { CarId = Convert.ToInt32(carId), Date = DateTime.Now }, file, path);
 
             if (result.Success)
@@ -74,10 +72,8 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("update")]
-        public IActionResult Update([FromForm(Name = "objectFile")] IFormFile objectFile, [FromForm(Name = "carImage")] CarImage carImage)
+        public IActionResult Update([FromForm(Name = "objectFile")] IFormFile objectFile, [FromForm(Name = "carImage")] CarImage carImage, string path = null)
         {
-            string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
-
             var result = _carImageService.Update(carImage, objectFile, path);
             if (result.Success)
             {
@@ -88,10 +84,8 @@ namespace WebAPI.Controllers
 
 
         [HttpDelete("delete")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(int id, string path = null)
         {
-            string path = _webHostEnvironment.WebRootPath + "\\uploads\\";
-
             var carImages = _carImageService.GetByCarId(id).Data;
 
             if (carImages.Count == 0)
@@ -99,7 +93,7 @@ namespace WebAPI.Controllers
                 return BadRequest("This car do not have image!");
             }
 
-            List<IResult> results = new List<IResult>();
+            List<IResult> results = new();
 
             foreach (var carImage in carImages)
             {
