@@ -1,12 +1,4 @@
 
-<p align="center">
-  <img src="https://img.shields.io/github/contributors/sezRR/ReCapProject?logo=github&style=for-the-badge">
-  <img src="https://img.shields.io/github/forks/sezRR/ReCapProject?logo=github&style=for-the-badge">
-  <img src="https://img.shields.io/github/stars/sezRR/ReCapProject?logo=github&style=for-the-badge">
-</p>
-
-<br>
-<br>
 <br>
 
 <p align="center">
