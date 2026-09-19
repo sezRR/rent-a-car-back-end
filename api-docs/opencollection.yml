@@ -1,10 +1,12 @@
 opencollection: 1.0.0
 
 info:
-  name: api-docs
+  name: Rentar API
 bundled: false
 extensions:
   bruno:
     ignore:
       - node_modules
       - .git
+    presets:
+      defaultEnvironment: Local

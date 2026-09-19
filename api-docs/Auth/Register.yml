@@ -1,0 +1,24 @@
+info:
+  name: Register
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/auth/register'
+  body:
+    type: json
+    data: |
+      {
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "{{email}}",
+        "password": "Password123!",
+        "findeksRating": 1000
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

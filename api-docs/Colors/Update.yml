@@ -1,0 +1,21 @@
+info:
+  name: Update
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/colors/update'
+  body:
+    type: json
+    data: |
+      {
+        "id": {{colorId}},
+        "colorName": "Blue"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

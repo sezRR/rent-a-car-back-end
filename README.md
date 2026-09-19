@@ -36,30 +36,30 @@ docker compose up -d
 dotnet tool restore
 
 # 3. apply migrations
-dotnet ef database update --project DataAccess --startup-project DataAccess
+dotnet ef database update --project src/DataAccess --startup-project src/DataAccess
 
 # 4. run the API
-dotnet run --project WebAPI
+dotnet run --project src/WebAPI
 ```
 
-Connection string lives in `WebAPI/appsettings.json` under `ConnectionStrings:RentarDb`, and can be
+Connection string lives in `src/WebAPI/appsettings.json` under `ConnectionStrings:RentarDb`, and can be
 overridden with the `ConnectionStrings__RentarDb` environment variable. When neither is present the
 context falls back to the docker-compose defaults, which is what `dotnet ef` uses.
 
 Adding a migration after an entity change:
 
 ```bash
-dotnet ef migrations add <Name> --project DataAccess --startup-project DataAccess
+dotnet ef migrations add <Name> --project src/DataAccess --startup-project src/DataAccess
 ```
 
 **Tests**
 
-`Tests/WebAPI.IntegrationTests` drives the API in memory (`WebApplicationFactory`) against a throwaway
+`src/Tests/WebAPI.IntegrationTests` drives the API in memory (`WebApplicationFactory`) against a throwaway
 PostgreSQL container started by Testcontainers, so Docker has to be running. Each test truncates the
 tables and clears the aspect cache beforehand.
 
 ```bash
-dotnet test --project Tests/WebAPI.IntegrationTests
+dotnet test --project src/Tests/WebAPI.IntegrationTests
 ```
 
 `global.json` opts the repository into the Microsoft.Testing.Platform runner that .NET 10 requires.
@@ -155,7 +155,7 @@ dotnet test --project Tests/WebAPI.IntegrationTests
 
 _Result implementation for healthy checking HTTP Request status_
 
-_On WebApi used wwwroot and you can easily upload your images to project(root)_
+_The WebAPI uses `src/WebAPI/wwwroot` for uploaded images._
 
 **Dependency Resolver**: _Autofac_
 

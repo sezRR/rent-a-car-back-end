@@ -1,0 +1,23 @@
+name: Local
+
+variables:
+  - name: baseUrl
+    value: http://localhost:5000
+  - name: brandId
+    value: "1"
+  - name: colorId
+    value: "1"
+  - name: carId
+    value: "1"
+  - name: carImageId
+    value: "1"
+  - name: customerId
+    value: "1"
+  - name: userId
+    value: "1"
+  - name: email
+    value: user@example.com
+  - name: findeksRating
+    value: "1000"
+  - name: imageFilePath
+    value: ../src/WebAPI/wwwroot/uploads/default.png

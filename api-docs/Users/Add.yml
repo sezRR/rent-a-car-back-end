@@ -1,0 +1,26 @@
+info:
+  name: Add
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/users/add'
+  body:
+    type: json
+    data: |
+      {
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "{{email}}",
+        "passwordHash": "AA==",
+        "passwordSalt": "AA==",
+        "status": true,
+        "findeksRating": 1000
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

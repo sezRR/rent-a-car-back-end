@@ -1,0 +1,23 @@
+info:
+  name: Add
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/rentals/add'
+  body:
+    type: json
+    data: |
+      {
+        "carId": {{carId}},
+        "customerId": {{customerId}},
+        "rentDate": "2026-10-01T10:00:00Z",
+        "returnDate": "2026-10-05T10:00:00Z"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

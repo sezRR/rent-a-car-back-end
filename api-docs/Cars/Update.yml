@@ -1,0 +1,26 @@
+info:
+  name: Update
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: '{{baseUrl}}/api/cars/update'
+  body:
+    type: json
+    data: |
+      {
+        "id": {{carId}},
+        "brandId": {{brandId}},
+        "colorId": {{colorId}},
+        "modelYear": 2026,
+        "dailyPrice": 125.00,
+        "description": "Updated rental car",
+        "minimumFindeksRating": 1000
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
