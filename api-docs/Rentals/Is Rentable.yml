@@ -12,8 +12,8 @@ http:
       {
         "carId": {{carId}},
         "customerId": {{customerId}},
-        "rentDate": "2026-10-01T10:00:00Z",
-        "returnDate": "2026-10-05T10:00:00Z"
+        "rentDate": "2026-10-01T10:00:00",
+        "returnDate": "2026-10-05T10:00:00"
       }
 
 settings:

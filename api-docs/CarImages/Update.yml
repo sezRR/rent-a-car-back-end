@@ -21,10 +21,7 @@ http:
         value: '{{carId}}'
       - name: carImage.ImagePath
         type: text
-        value: wwwroot/uploads/default.png
-      - name: carImage.Date
-        type: text
-        value: 2026-01-01T00:00:00Z
+        value: '{{carImageFileName}}'
 
 settings:
   encodeUrl: true

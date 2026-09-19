@@ -21,3 +21,5 @@ variables:
     value: "1000"
   - name: imageFilePath
     value: ../src/WebAPI/wwwroot/uploads/default.png
+  - name: carImageFileName
+    value: replace-with-current-image-file-name.jpg
