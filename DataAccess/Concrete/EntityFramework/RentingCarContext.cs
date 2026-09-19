@@ -1,17 +1,41 @@
-﻿using Core.Entities.Concrete;
+using Core.Entities.Concrete;
 using Entities.Concrete;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace DataAccess.Concrete.EntityFramework
 {
     public class RentingCarContext : DbContext
     {
+        public RentingCarContext()
+        {
+        }
+
+        public RentingCarContext(DbContextOptions<RentingCarContext> options) : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\MSSQLLocalDB;Database=RentingCar;Trusted_Connection=true");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseNpgsql(DbConnectionString.Resolve());
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Npgsql maps DateTime to "timestamp with time zone", which rejects values whose Kind is not Utc.
+            // The entities hold local wall-clock dates, so store them without a time zone.
+            var dateProperties = modelBuilder.Model.GetEntityTypes()
+                .SelectMany(entityType => entityType.GetProperties())
+                .Where(property => property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?));
+
+            foreach (var property in dateProperties)
+            {
+                property.SetColumnType("timestamp without time zone");
+            }
         }
 
         public DbSet<Car> Cars { get; set; }

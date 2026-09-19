@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text.Json.Serialization;
 
 namespace Core.Utilities.Results
 {
     public class Result : IResult
     {
-        public Result(bool success, string message) : this(success)
+        [JsonConstructor]
+        public Result(bool success, string message)
         {
+            Success = success;
             Message = message;
         }
 
@@ -17,7 +17,6 @@ namespace Core.Utilities.Results
         }
 
         public bool Success { get; }
-
         public string Message { get; }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using IResult = Core.Utilities.Results.IResult;
 
 namespace Business.Abstract
 {

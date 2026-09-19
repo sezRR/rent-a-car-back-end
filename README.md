@@ -24,6 +24,48 @@
 
 <br>
 
+**Getting Started**
+
+Requirements: .NET 10 SDK, Docker.
+
+```bash
+# 1. start PostgreSQL (defaults: rentar/rentar/rentar on port 5432, override via .env)
+docker compose up -d
+
+# 2. restore the local dotnet-ef tool
+dotnet tool restore
+
+# 3. apply migrations
+dotnet ef database update --project DataAccess --startup-project DataAccess
+
+# 4. run the API
+dotnet run --project WebAPI
+```
+
+Connection string lives in `WebAPI/appsettings.json` under `ConnectionStrings:RentarDb`, and can be
+overridden with the `ConnectionStrings__RentarDb` environment variable. When neither is present the
+context falls back to the docker-compose defaults, which is what `dotnet ef` uses.
+
+Adding a migration after an entity change:
+
+```bash
+dotnet ef migrations add <Name> --project DataAccess --startup-project DataAccess
+```
+
+**Tests**
+
+`Tests/WebAPI.IntegrationTests` drives the API in memory (`WebApplicationFactory`) against a throwaway
+PostgreSQL container started by Testcontainers, so Docker has to be running. Each test truncates the
+tables and clears the aspect cache beforehand.
+
+```bash
+dotnet test --project Tests/WebAPI.IntegrationTests
+```
+
+`global.json` opts the repository into the Microsoft.Testing.Platform runner that .NET 10 requires.
+
+<br>
+
 **About the Project Briefly**
 1. Backend is appropriate for SOLID 
 2. All entities have CRUD operations from EntityRepository 
@@ -119,4 +161,4 @@ _On WebApi used wwwroot and you can easily upload your images to project(root)_
 
 **Validation**: _FluentValidation_
 
-**Database Operations & Data Access Operations**: _EntityFrameworkCore_
+**Database Operations & Data Access Operations**: _EntityFrameworkCore (PostgreSQL / Npgsql)_

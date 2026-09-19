@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IResult = Core.Utilities.Results.IResult;
 
 namespace Core.Utilities.FileHelper
 {

@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: rentar-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rentar}
+      POSTGRES_USER: ${POSTGRES_USER:-rentar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rentar}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - rentar-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rentar} -d ${POSTGRES_DB:-rentar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rentar-postgres-data:
