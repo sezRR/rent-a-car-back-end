@@ -16,10 +16,12 @@ namespace Business.Concrete;
 public class CarManager : ICarService
 {
     ICarDal _carDal;
+    ICarImageService _carImageService;
 
-    public CarManager(ICarDal carDal)
+    public CarManager(ICarDal carDal, ICarImageService carImageService)
     {
         _carDal = carDal;
+        _carImageService = carImageService;
     }
 
     //[SecuredOperation("car.add")]
@@ -39,8 +41,15 @@ public class CarManager : ICarService
         return new SuccessResult(Messages.CarUpdated);
     }
 
+    [TransactionScopeAspect]
     public IResult Delete(Car car)
     {
+        // Images are not tied to the car by a foreign key, so their rows and files are removed here.
+        foreach (var carImage in _carImageService.GetByCarId(car.Id).Data)
+        {
+            _carImageService.Delete(carImage);
+        }
+
         _carDal.Delete(car);
 
         return new SuccessResult(Messages.CarDeleted);

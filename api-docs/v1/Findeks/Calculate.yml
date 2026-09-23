@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/v1/findekses/calculate"
+  url: "{{baseUrl}}/api/v1/findeks/calculate"
 
 settings:
   encodeUrl: true

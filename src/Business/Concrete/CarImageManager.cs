@@ -2,7 +2,7 @@
 using Business.Constants;
 using Core.Utilities.Business;
 using Core.Utilities.FileHelper;
-using Core.Utilities.FileOperations;
+using Core.Aspects.Autofac.Transaction;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
@@ -23,16 +23,19 @@ public class CarImageManager : ICarImageService
     }
 
     //[ValidationAspect(typeof(CarImageValidator))]
-    public IResult Add(CarImage carImage, IFormFile file, string path = null)
+    [TransactionScopeAspect]
+    public IResult Add(CarImage carImage, IFormFile file)
     {
-        var result = BusinessRules.Run(CheckIfReachCarImageLimit(carImage.CarId));
+        var result = BusinessRules.Run(
+            CheckIfReachCarImageLimit(carImage.CarId),
+            CheckIfImageFileValid(file, allowMissing: true));
 
         if (result != null)
         {
             return result;
         }
 
-        carImage.ImagePath = FileOperations.CheckCarImageDefaultOrNot(file, path).Data;
+        carImage.ImagePath = file == null ? FileHelper.DefaultImageName : FileHelper.Add(file);
 
         _carImageDal.Add(carImage);
 
@@ -40,9 +43,24 @@ public class CarImageManager : ICarImageService
     }
 
     //[ValidationAspect(typeof(CarImageValidator))]
-    public IResult Update(CarImage carImage, IFormFile file, string path = null)
+    [TransactionScopeAspect]
+    public IResult Update(CarImage carImage, IFormFile file)
     {
-        carImage.ImagePath = FileHelper.Update(file, carImage.ImagePath, ref path);
+        var result = BusinessRules.Run(CheckIfImageFileValid(file, allowMissing: false));
+
+        if (result != null)
+        {
+            return result;
+        }
+
+        // The stored path is used, not the one sent by the client, so only this image's file is replaced.
+        var existing = _carImageDal.Get(c => c.Id == carImage.Id);
+        if (existing == null)
+        {
+            return new ErrorResult(Messages.CarImageNotFound);
+        }
+
+        carImage.ImagePath = FileHelper.Update(file, existing.ImagePath);
         carImage.Date = DateTime.Now;
 
         _carImageDal.Update(carImage);
@@ -50,18 +68,12 @@ public class CarImageManager : ICarImageService
         return new SuccessResult();
     }
 
-    public IResult Delete(CarImage carImage, string path = null)
+    [TransactionScopeAspect]
+    public IResult Delete(CarImage carImage)
     {
-        if (carImage.ImagePath == "default.png")
-        {
-            _carImageDal.Delete(carImage);
-        }
-        else
-        {
-            FileHelper.Delete(carImage.ImagePath, path);
+        _carImageDal.Delete(carImage);
 
-            _carImageDal.Delete(carImage);
-        }
+        FileHelper.Delete(carImage.ImagePath);
 
         return new SuccessResult();
     }
@@ -90,5 +102,20 @@ public class CarImageManager : ICarImageService
             return new SuccessResult();
         }
         return new ErrorResult(Messages.CarImageLimitReached);
+    }
+
+    private static IResult CheckIfImageFileValid(IFormFile file, bool allowMissing)
+    {
+        // Adding without a file falls back to the default image.
+        if (file == null && allowMissing)
+        {
+            return new SuccessResult();
+        }
+
+        if (ImageFileValidator.IsSupportedImage(file))
+        {
+            return new SuccessResult();
+        }
+        return new ErrorResult(Messages.CarImageInvalidFile);
     }
 }

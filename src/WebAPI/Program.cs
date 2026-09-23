@@ -13,10 +13,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
+using WebAPI.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
 FileHelper.Configuration = builder.Configuration;
+FileHelper.BasePath = builder.Environment.ContentRootPath;
 
 builder.Host
     .UseServiceProviderFactory(new AutofacServiceProviderFactory())
@@ -25,10 +28,15 @@ builder.Host
         container.RegisterModule(new AutofacBusinessModule());
     });
 
-builder.Services.AddControllers();
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors();
-builder.Services.AddApiVersioning(options => options.ApiVersionReader = new UrlSegmentApiVersionReader());
+builder.Services.AddOpenApi(options => options.AddDocumentTransformer<ApiVersionPathTransformer>());
+builder.Services.AddApiVersioning(options =>
+{
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    options.ReportApiVersions = true;
+});
 
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 
@@ -56,6 +64,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference("/docs").AllowAnonymous();
 }
 
 app.ConfigureCustomExceptionMiddleware();
@@ -68,7 +78,7 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapAllEndpoints();
 
 app.Run();
 

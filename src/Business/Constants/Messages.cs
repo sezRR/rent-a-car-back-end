@@ -43,6 +43,8 @@ public class Messages
     public static string RentalDeleted = "Rental Deleted";
 
     public static string CarImageLimitReached = "You can not add more picture about your car. You reached limit of the car images (can only upload 5 images to a car)";
+    public static string CarImageNotFound = "Car image not found";
+    public static string CarImageInvalidFile = "Only PNG and JPEG images (.png, .jpg, .jpeg) can be uploaded";
 
     public static string MaintenanceTime = "Servers in Maintenance (Time)";
     public static string UserNotFound = "User not found";

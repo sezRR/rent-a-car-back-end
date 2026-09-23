@@ -12,7 +12,7 @@ public interface ICarImageService
     IDataResult<CarImage> GetById(int id);
     IDataResult<List<CarImage>> GetByCarId(int carId);
 
-    IResult Add(CarImage carImage, IFormFile file, string path = null);
-    IResult Update(CarImage carImage, IFormFile file, string path = null);
-    IResult Delete(CarImage carImage, string path = null);
+    IResult Add(CarImage carImage, IFormFile file);
+    IResult Update(CarImage carImage, IFormFile file);
+    IResult Delete(CarImage carImage);
 }

@@ -1,73 +1,97 @@
-﻿using Core.Utilities.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
-using IResult = Core.Utilities.Results.IResult;
+using System.Transactions;
 
 namespace Core.Utilities.FileHelper;
 
+/// <summary>
+/// Stores uploaded images in the configured uploads folder. Inside an ambient transaction the disk follows
+/// the database: deleted files are only removed once the transaction commits, and added files are removed
+/// again if it rolls back.
+/// </summary>
 public class FileHelper
 {
+    public const string DefaultImageName = "default.png";
+
     public static IConfiguration Configuration { get; set; }
+    public static string BasePath { get; set; } = AppContext.BaseDirectory;
 
-    public static string Add(IFormFile file, ref string path)
+    public static string UploadsPath => Path.GetFullPath(Configuration["Paths:DefaultCarImagePath"], BasePath);
+
+    public static string Add(IFormFile file)
     {
-        CheckPathValue(ref path);
+        Directory.CreateDirectory(UploadsPath);
 
-        if (!Directory.Exists(path))
+        var fileName = NewFileName(file);
+        var fullPath = Path.Combine(UploadsPath, fileName);
+
+        using (var stream = new FileStream(fullPath, FileMode.CreateNew))
         {
-            Directory.CreateDirectory(path);
-        }
-        var sourcePath = Path.GetTempFileName();
-        if (file.Length > 0)
-        {
-            using var stream = new FileStream(sourcePath, FileMode.Create);
             file.CopyTo(stream);
         }
 
-        var result = NewPath(file);
-        File.Move(sourcePath, path + result);
+        OnTransactionEnd(committed =>
+        {
+            if (!committed)
+            {
+                File.Delete(fullPath);
+            }
+        });
 
-        return result;
+        return fileName;
     }
 
-    public static string Update(IFormFile file, string oldPath, ref string path)
+    public static string Update(IFormFile file, string oldFileName)
     {
-        //path = CheckPathValue(ref path);
+        var fileName = Add(file);
 
-        var newImagePath = Add(file, ref path);
+        Delete(oldFileName);
 
-        File.Delete(path + oldPath);
-
-        return newImagePath;
+        return fileName;
     }
 
-    public static IResult Delete(string fileName, string path)
+    public static void Delete(string fileName)
     {
-        var sourcePath = path + fileName;
-        File.Delete(sourcePath);
+        // The default image is shared by every car without an upload, so it is never removed.
+        if (string.IsNullOrEmpty(fileName) || fileName == DefaultImageName)
+        {
+            return;
+        }
 
-        return new SuccessResult();
+        // Only the file name is kept so a stored value can not point outside the uploads folder.
+        var fullPath = Path.Combine(UploadsPath, Path.GetFileName(fileName));
+
+        if (Transaction.Current == null)
+        {
+            File.Delete(fullPath);
+            return;
+        }
+
+        OnTransactionEnd(committed =>
+        {
+            if (committed)
+            {
+                File.Delete(fullPath);
+            }
+        });
     }
 
-    public static string NewPath(IFormFile file)
+    private static void OnTransactionEnd(Action<bool> action)
     {
-        FileInfo fileInfo = new FileInfo(file.FileName);
-        string fileExtension = fileInfo.Extension;
+        var transaction = Transaction.Current;
+        if (transaction == null)
+        {
+            return;
+        }
 
-        var uniqueFileName =
-            Guid.NewGuid().ToString("N") +
-            fileExtension;
-
-        string result = $@"{uniqueFileName}";
-
-        return result;
+        transaction.TransactionCompleted += (_, e) =>
+            action(e.Transaction.TransactionInformation.Status == TransactionStatus.Committed);
     }
 
-    public static string CheckPathValue(ref string path)
+    private static string NewFileName(IFormFile file)
     {
-        path ??= Path.GetFullPath(Configuration["Paths:DefaultCarImagePath"]);
-        return path;
+        return Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName).ToLowerInvariant();
     }
 }

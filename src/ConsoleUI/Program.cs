@@ -210,7 +210,7 @@ class Program
 
     private static void CarDetailsTest()
     {
-        CarManager carManager = new CarManager(new EfCarDal());
+        CarManager carManager = new CarManager(new EfCarDal(), new CarImageManager(new EfCarImageDal()));
 
         var result = carManager.GetCarDetails();
 
@@ -277,7 +277,7 @@ class Program
 
     private static void CarTest()
     {
-        CarManager carManager = new CarManager(new EfCarDal());
+        CarManager carManager = new CarManager(new EfCarDal(), new CarImageManager(new EfCarImageDal()));
 
         //carManager.Add(new Car { CarId = 1, BrandId = 1, ColorId = 2, DailyPrice = 500, Description = "very clean rentable mercedes", ModelYear = 2019 });
         //carManager.Add(new Car { CarId = 2, BrandId = 1, ColorId = 1, DailyPrice = 750, Description = "very clean rentable audi", ModelYear = 2020 });
