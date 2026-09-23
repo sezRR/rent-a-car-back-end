@@ -1,12 +1,8 @@
 ﻿using Core.Utilities.Results;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Business.Abstract
+namespace Business.Abstract;
+
+public interface IPaymentService
 {
-    public interface IPaymentService
-    {
-        IResult Pay();
-    }
+    IResult Pay();
 }

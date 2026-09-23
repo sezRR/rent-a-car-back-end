@@ -1,10 +1,9 @@
 using Xunit;
 
-namespace WebAPI.IntegrationTests
+namespace WebAPI.IntegrationTests;
+
+[CollectionDefinition(Name)]
+public class ApiCollection : ICollectionFixture<RentarApiFactory>
 {
-    [CollectionDefinition(Name)]
-    public class ApiCollection : ICollectionFixture<RentarApiFactory>
-    {
-        public const string Name = "api";
-    }
+    public const string Name = "api";
 }

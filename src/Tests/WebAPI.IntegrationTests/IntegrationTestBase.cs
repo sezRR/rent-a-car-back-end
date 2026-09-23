@@ -2,30 +2,29 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace WebAPI.IntegrationTests
+namespace WebAPI.IntegrationTests;
+
+[Collection(ApiCollection.Name)]
+public abstract class IntegrationTestBase : IAsyncLifetime
 {
-    [Collection(ApiCollection.Name)]
-    public abstract class IntegrationTestBase : IAsyncLifetime
+    private readonly RentarApiFactory _factory;
+
+    protected IntegrationTestBase(RentarApiFactory factory)
     {
-        private readonly RentarApiFactory _factory;
+        _factory = factory;
+        Client = factory.CreateClient();
+    }
 
-        protected IntegrationTestBase(RentarApiFactory factory)
-        {
-            _factory = factory;
-            Client = factory.CreateClient();
-        }
+    protected HttpClient Client { get; }
 
-        protected HttpClient Client { get; }
+    public async ValueTask InitializeAsync()
+    {
+        await _factory.ResetAsync();
+    }
 
-        public async ValueTask InitializeAsync()
-        {
-            await _factory.ResetAsync();
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            Client.Dispose();
-            return ValueTask.CompletedTask;
-        }
+    public ValueTask DisposeAsync()
+    {
+        Client.Dispose();
+        return ValueTask.CompletedTask;
     }
 }

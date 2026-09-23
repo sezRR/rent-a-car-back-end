@@ -24,5 +24,5 @@ public class FindeksesController : ControllerBase
         if (result.Success) return Ok(result);
 
         return BadRequest(result);
-    } 
+    }
 }

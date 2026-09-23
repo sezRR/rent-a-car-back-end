@@ -1,13 +1,9 @@
 ﻿using Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Entities.Concrete
+namespace Entities.Concrete;
+
+public class Brand : IEntity
 {
-    public class Brand : IEntity
-    {
-        public int Id { get; set; }
-        public string BrandName { get; set; }
-    }
+    public int Id { get; set; }
+    public string BrandName { get; set; }
 }

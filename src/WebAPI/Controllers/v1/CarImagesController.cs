@@ -96,7 +96,7 @@ public class CarImagesController : ControllerBase
         foreach (var carImage in carImages)
         {
             var result = _carImageService.Delete(carImage, path);
-            results.Add(result);     
+            results.Add(result);
         }
 
         foreach (var result in results)

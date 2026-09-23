@@ -1,18 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Core.Utilities.IoC
+namespace Core.Utilities.IoC;
+
+public class ServiceTool
 {
-    public class ServiceTool
-    {
-        public static IServiceProvider ServiceProvider { get; private set; }
+    public static IServiceProvider ServiceProvider { get; private set; }
 
-        public static IServiceCollection Create(IServiceCollection services)
-        {
-            ServiceProvider = services.BuildServiceProvider();
-            return services;
-        }
+    public static IServiceCollection Create(IServiceCollection services)
+    {
+        ServiceProvider = services.BuildServiceProvider();
+        return services;
     }
 }

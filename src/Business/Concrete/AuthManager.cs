@@ -5,72 +5,68 @@ using Core.Utilities.Results;
 using Core.Utilities.Security.Hashing;
 using Core.Utilities.Security.JWT;
 using Entities.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Business.Concrete
+namespace Business.Concrete;
+
+public class AuthManager : IAuthService
 {
-    public class AuthManager : IAuthService
+    private IUserService _userService;
+    private ITokenHelper _tokenHelper;
+
+    public AuthManager(IUserService userService, ITokenHelper tokenHelper)
     {
-        private IUserService _userService;
-        private ITokenHelper _tokenHelper;
+        _userService = userService;
+        _tokenHelper = tokenHelper;
+    }
 
-        public AuthManager(IUserService userService, ITokenHelper tokenHelper)
+    public IDataResult<AccessToken> CreateAccessToken(User user)
+    {
+        var claims = _userService.GetClaims(user);
+        var accessToken = _tokenHelper.CreateToken(user, claims);
+        return new SuccessDataResult<AccessToken>(accessToken, Messages.AccessTokenCreated);
+    }
+
+    public IDataResult<User> Login(UserForLoginDto userForLoginDto)
+    {
+        var userToCheck = _userService.GetByMail(userForLoginDto.Email);
+        if (userToCheck == null)
         {
-            _userService = userService;
-            _tokenHelper = tokenHelper;
+            return new ErrorDataResult<User>(Messages.UserNotFound);
         }
 
-        public IDataResult<AccessToken> CreateAccessToken(User user)
+        if (!HashingHelper.VerifyPasswordHash(userForLoginDto.Password, userToCheck.PasswordHash, userToCheck.PasswordSalt))
         {
-            var claims = _userService.GetClaims(user);
-            var accessToken = _tokenHelper.CreateToken(user, claims);
-            return new SuccessDataResult<AccessToken>(accessToken, Messages.AccessTokenCreated);
+            return new ErrorDataResult<User>(Messages.PasswordError);
         }
+        return new SuccessDataResult<User>(userToCheck, Messages.SuccessfulLogin);
+    }
 
-        public IDataResult<User> Login(UserForLoginDto userForLoginDto)
+    public IDataResult<User> Register(UserForRegisterDto userForRegisterDto, string password)
+    {
+        byte[] passwordHash, passwordSalt;
+        HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
+
+        var user = new User
         {
-            var userToCheck = _userService.GetByMail(userForLoginDto.Email);
-            if (userToCheck == null)
-            {
-                return new ErrorDataResult<User>(Messages.UserNotFound);
-            }
+            FirstName = userForRegisterDto.FirstName,
+            LastName = userForRegisterDto.LastName,
+            Email = userForRegisterDto.Email,
+            PasswordHash = passwordHash,
+            PasswordSalt = passwordSalt,
+            Status = true,
+            FindeksRating = userForRegisterDto.FindeksRating,
+        };
 
-            if (!HashingHelper.VerifyPasswordHash(userForLoginDto.Password, userToCheck.PasswordHash, userToCheck.PasswordSalt))
-            {
-                return new ErrorDataResult<User>(Messages.PasswordError);
-            }
-            return new SuccessDataResult<User>(userToCheck, Messages.SuccessfulLogin);
-        }
+        _userService.Add(user);
+        return new SuccessDataResult<User>(user, Messages.UserRegistered);
+    }
 
-        public IDataResult<User> Register(UserForRegisterDto userForRegisterDto, string password)
+    public IResult UserExists(string email)
+    {
+        if (_userService.GetByMail(email) != null)
         {
-            byte[] passwordHash, passwordSalt;
-            HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
-
-            var user = new User
-            {
-                FirstName = userForRegisterDto.FirstName,
-                LastName = userForRegisterDto.LastName,
-                Email = userForRegisterDto.Email,
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
-                Status = true,
-                FindeksRating = userForRegisterDto.FindeksRating,
-            };
-
-            _userService.Add(user);
-            return new SuccessDataResult<User>(user, Messages.UserRegistered);
+            return new ErrorResult(Messages.UserAlreadyExists);
         }
-
-        public IResult UserExists(string email)
-        {
-            if (_userService.GetByMail(email) != null)
-            {
-                return new ErrorResult(Messages.UserAlreadyExists);
-            }
-            return new SuccessResult();
-        }
+        return new SuccessResult();
     }
 }

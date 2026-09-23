@@ -1,13 +1,8 @@
 ﻿using Core.Utilities.Results;
-using Entities.Concrete;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Business.Abstract
+namespace Business.Abstract;
+
+public interface IFindeksService
 {
-    public interface IFindeksService
-    {
-        IDataResult<int> CalculateFindeksRating();
-    }
+    IDataResult<int> CalculateFindeksRating();
 }

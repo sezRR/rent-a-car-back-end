@@ -2,76 +2,72 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using IResult = Core.Utilities.Results.IResult;
 
-namespace Core.Utilities.FileHelper
+namespace Core.Utilities.FileHelper;
+
+public class FileHelper
 {
-    public class FileHelper
+    public static IConfiguration Configuration { get; set; }
+
+    public static string Add(IFormFile file, ref string path)
     {
-        public static IConfiguration Configuration { get; set; }
+        CheckPathValue(ref path);
 
-        public static string Add(IFormFile file, ref string path)
+        if (!Directory.Exists(path))
         {
-            CheckPathValue(ref path);
-
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            var sourcePath = Path.GetTempFileName();
-            if (file.Length > 0)
-            {
-                using var stream = new FileStream(sourcePath, FileMode.Create);
-                file.CopyTo(stream);
-            }
-
-            var result = NewPath(file);
-            File.Move(sourcePath, path+result);
-
-            return result;
+            Directory.CreateDirectory(path);
+        }
+        var sourcePath = Path.GetTempFileName();
+        if (file.Length > 0)
+        {
+            using var stream = new FileStream(sourcePath, FileMode.Create);
+            file.CopyTo(stream);
         }
 
-        public static string Update(IFormFile file, string oldPath, ref string path)
-        {
-            //path = CheckPathValue(ref path);
+        var result = NewPath(file);
+        File.Move(sourcePath, path + result);
 
-            var newImagePath = Add(file, ref path);
+        return result;
+    }
 
-            File.Delete(path+oldPath);
+    public static string Update(IFormFile file, string oldPath, ref string path)
+    {
+        //path = CheckPathValue(ref path);
 
-            return newImagePath;
-        }
+        var newImagePath = Add(file, ref path);
 
-        public static IResult Delete(string fileName, string path)
-        {
-            var sourcePath = path + fileName;
-            File.Delete(sourcePath);
+        File.Delete(path + oldPath);
 
-            return new SuccessResult();
-        }
+        return newImagePath;
+    }
 
-        public static string NewPath(IFormFile file)
-        {
-            FileInfo fileInfo = new FileInfo(file.FileName);
-            string fileExtension = fileInfo.Extension;
+    public static IResult Delete(string fileName, string path)
+    {
+        var sourcePath = path + fileName;
+        File.Delete(sourcePath);
 
-            var uniqueFileName = 
-                Guid.NewGuid().ToString("N") +
-                fileExtension;
+        return new SuccessResult();
+    }
 
-            string result = $@"{uniqueFileName}";
+    public static string NewPath(IFormFile file)
+    {
+        FileInfo fileInfo = new FileInfo(file.FileName);
+        string fileExtension = fileInfo.Extension;
 
-            return result;
-        }
+        var uniqueFileName =
+            Guid.NewGuid().ToString("N") +
+            fileExtension;
 
-        public static string CheckPathValue(ref string path)
-        {
-            path ??= Path.GetFullPath(Configuration["Paths:DefaultCarImagePath"]);
-            return path;
-        }
+        string result = $@"{uniqueFileName}";
+
+        return result;
+    }
+
+    public static string CheckPathValue(ref string path)
+    {
+        path ??= Path.GetFullPath(Configuration["Paths:DefaultCarImagePath"]);
+        return path;
     }
 }

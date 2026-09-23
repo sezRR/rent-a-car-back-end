@@ -4,34 +4,31 @@ using Microsoft.AspNetCore.Http;
 using Castle.DynamicProxy;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Core.Extensions;
 using Business.Constants;
-namespace Business.BusinessAspects.Autofac
+namespace Business.BusinessAspects.Autofac;
+
+public class SecuredOperation : MethodInterception
 {
-    public class SecuredOperation : MethodInterception
+    private string[] _roles;
+    private IHttpContextAccessor _httpContextAccessor;
+
+    public SecuredOperation(string roles)
     {
-        private string[] _roles;
-        private IHttpContextAccessor _httpContextAccessor;
+        _roles = roles.Split(',');
+        _httpContextAccessor = ServiceTool.ServiceProvider.GetService<IHttpContextAccessor>();
+    }
 
-        public SecuredOperation(string roles)
+    protected override void OnBefore(IInvocation invocation)
+    {
+        var roleClaims = _httpContextAccessor.HttpContext.User.ClaimRoles();
+        foreach (var role in _roles)
         {
-            _roles = roles.Split(',');
-            _httpContextAccessor = ServiceTool.ServiceProvider.GetService<IHttpContextAccessor>();
-        }
-
-        protected override void OnBefore(IInvocation invocation)
-        {
-            var roleClaims = _httpContextAccessor.HttpContext.User.ClaimRoles();
-            foreach (var role in _roles)
+            if (roleClaims.Contains(role))
             {
-                if (roleClaims.Contains(role))
-                {
-                    return;
-                }
+                return;
             }
-            throw new Exception(Messages.AuthorizationDenied);
         }
+        throw new Exception(Messages.AuthorizationDenied);
     }
 }
