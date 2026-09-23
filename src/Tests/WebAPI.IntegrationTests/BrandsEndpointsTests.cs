@@ -17,14 +17,14 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Add_PersistsBrand_AndGetAllReturnsIt()
         {
-            var response = await Client.PostJsonAsync("/api/brands/add", new Brand { BrandName = "Toyota" });
+            var response = await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = "Toyota" });
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var added = await response.ReadAsAsync<Result>();
             Assert.True(added.Success);
             Assert.Equal("Brand Added", added.Message);
 
-            var brands = await Client.GetJsonAsync("/api/brands/getall");
+            var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
             var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
 
             Assert.True(listed.Success);
@@ -36,11 +36,11 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task GetById_ReturnsRequestedBrand()
         {
-            await Client.PostJsonAsync("/api/brands/add", new Brand { BrandName = "Honda" });
-            await Client.PostJsonAsync("/api/brands/add", new Brand { BrandName = "Renault" });
+            await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = "Honda" });
+            await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = "Renault" });
             var id = await GetBrandIdAsync("Renault");
 
-            var response = await Client.GetJsonAsync($"/api/brands/getbyid?id={id}");
+            var response = await Client.GetJsonAsync($"/api/v1/brands/getbyid?id={id}");
             var result = await response.ReadAsAsync<DataResult<Brand>>();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -50,13 +50,13 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Update_ChangesBrandName()
         {
-            await Client.PostJsonAsync("/api/brands/add", new Brand { BrandName = "Ople" });
+            await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = "Ople" });
             var id = await GetBrandIdAsync("Ople");
 
-            var response = await Client.PostJsonAsync("/api/brands/update", new Brand { Id = id, BrandName = "Opel" });
+            var response = await Client.PostJsonAsync("/api/v1/brands/update", new Brand { Id = id, BrandName = "Opel" });
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var updated = await Client.GetJsonAsync($"/api/brands/getbyid?id={id}");
+            var updated = await Client.GetJsonAsync($"/api/v1/brands/getbyid?id={id}");
             var result = await updated.ReadAsAsync<DataResult<Brand>>();
 
             Assert.Equal("Opel", result.Data.BrandName);
@@ -65,13 +65,13 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Delete_RemovesBrand()
         {
-            await Client.PostJsonAsync("/api/brands/add", new Brand { BrandName = "Fiat" });
+            await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = "Fiat" });
             var id = await GetBrandIdAsync("Fiat");
 
-            var response = await Client.PostJsonAsync("/api/brands/delete", new Brand { Id = id, BrandName = "Fiat" });
+            var response = await Client.PostJsonAsync("/api/v1/brands/delete", new Brand { Id = id, BrandName = "Fiat" });
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var brands = await Client.GetJsonAsync("/api/brands/getall");
+            var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
             var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
 
             Assert.Empty(listed.Data);
@@ -80,7 +80,7 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Add_WithNameShorterThanTwoCharacters_ReturnsValidationError()
         {
-            var response = await Client.PostJsonAsync("/api/brands/add", new Brand { BrandName = "A" });
+            var response = await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = "A" });
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -88,14 +88,14 @@ namespace WebAPI.IntegrationTests
             Assert.Equal(400, error.StatusCode);
             Assert.Contains(error.Errors, e => e.PropertyName == "BrandName");
 
-            var brands = await Client.GetJsonAsync("/api/brands/getall");
+            var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
             var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
             Assert.Empty(listed.Data);
         }
 
         private async Task<int> GetBrandIdAsync(string brandName)
         {
-            var brands = await Client.GetJsonAsync("/api/brands/getall");
+            var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
             var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
 
             return listed.Data.Find(b => b.BrandName == brandName).Id;

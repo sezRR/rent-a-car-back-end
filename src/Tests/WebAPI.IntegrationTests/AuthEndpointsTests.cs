@@ -19,7 +19,7 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Register_ReturnsAccessToken()
         {
-            var response = await Client.PostJsonAsync("/api/auth/register", NewUser());
+            var response = await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -32,9 +32,9 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Register_WithAlreadyUsedEmail_ReturnsBadRequest()
         {
-            await Client.PostJsonAsync("/api/auth/register", NewUser());
+            await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
-            var response = await Client.PostJsonAsync("/api/auth/register", NewUser());
+            var response = await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             var result = await response.ReadAsAsync<Result>();
@@ -45,9 +45,9 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Login_WithValidCredentials_ReturnsAccessToken()
         {
-            await Client.PostJsonAsync("/api/auth/register", NewUser());
+            await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
-            var response = await Client.PostJsonAsync("/api/auth/login", new UserForLoginDto
+            var response = await Client.PostJsonAsync("/api/v1/auth/login", new UserForLoginDto
             {
                 Email = Email,
                 Password = Password
@@ -61,9 +61,9 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Login_WithWrongPassword_ReturnsBadRequest()
         {
-            await Client.PostJsonAsync("/api/auth/register", NewUser());
+            await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
-            var response = await Client.PostJsonAsync("/api/auth/login", new UserForLoginDto
+            var response = await Client.PostJsonAsync("/api/v1/auth/login", new UserForLoginDto
             {
                 Email = Email,
                 Password = "wrong-password"
@@ -76,7 +76,7 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Login_WithUnknownEmail_ReturnsBadRequest()
         {
-            var response = await Client.PostJsonAsync("/api/auth/login", new UserForLoginDto
+            var response = await Client.PostJsonAsync("/api/v1/auth/login", new UserForLoginDto
             {
                 Email = "nobody@example.com",
                 Password = Password

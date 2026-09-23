@@ -21,10 +21,10 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Add_StoresLocalDateTimes_AndGetAllReturnsThem()
         {
-            var response = await Client.PostJsonAsync("/api/rentals/add", NewRental());
+            var response = await Client.PostJsonAsync("/api/v1/rentals/add", NewRental());
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var rentals = await Client.GetJsonAsync("/api/rentals/getall");
+            var rentals = await Client.GetJsonAsync("/api/v1/rentals/getall");
             var listed = await rentals.ReadAsAsync<DataResult<List<Rental>>>();
 
             var rental = Assert.Single(listed.Data);
@@ -36,10 +36,10 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task GetRentalByCarId_ReturnsRentalOfThatCar()
         {
-            await Client.PostJsonAsync("/api/rentals/add", NewRental(carId: 1));
-            await Client.PostJsonAsync("/api/rentals/add", NewRental(carId: 2, customerId: 7));
+            await Client.PostJsonAsync("/api/v1/rentals/add", NewRental(carId: 1));
+            await Client.PostJsonAsync("/api/v1/rentals/add", NewRental(carId: 2, customerId: 7));
 
-            var response = await Client.GetJsonAsync("/api/rentals/getrentalbycarid?carId=2");
+            var response = await Client.GetJsonAsync("/api/v1/rentals/getrentalbycarid?carId=2");
             var result = await response.ReadAsAsync<DataResult<Rental>>();
 
             Assert.Equal(2, result.Data.CarId);
@@ -49,7 +49,7 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Add_WithoutDates_ReturnsValidationErrors()
         {
-            var response = await Client.PostJsonAsync("/api/rentals/add", new Rental
+            var response = await Client.PostJsonAsync("/api/v1/rentals/add", new Rental
             {
                 CarId = 1,
                 CustomerId = 1

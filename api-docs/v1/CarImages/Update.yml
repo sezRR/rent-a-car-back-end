@@ -1,0 +1,31 @@
+info:
+  name: Update
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/carimages/update"
+  body:
+    type: multipart-form
+    data:
+      - name: objectFile
+        type: file
+        value:
+          - "{{imageFilePath}}"
+      - name: carImage.Id
+        type: text
+        value: "{{carImageId}}"
+      - name: carImage.CarId
+        type: text
+        value: "{{carId}}"
+      - name: carImage.ImagePath
+        type: text
+        value: "{{carImageFileName}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

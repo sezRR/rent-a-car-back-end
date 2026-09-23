@@ -19,10 +19,10 @@ namespace WebAPI.IntegrationTests
         [Fact]
         public async Task Add_PersistsCar_AndGetAllReturnsIt()
         {
-            var response = await Client.PostJsonAsync("/api/cars/add", NewCar());
+            var response = await Client.PostJsonAsync("/api/v1/cars/add", NewCar());
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var cars = await Client.GetJsonAsync("/api/cars/getall");
+            var cars = await Client.GetJsonAsync("/api/v1/cars/getall");
             var listed = await cars.ReadAsAsync<DataResult<List<Car>>>();
 
             var car = Assert.Single(listed.Data);
@@ -43,7 +43,7 @@ namespace WebAPI.IntegrationTests
                 MinimumFindeksRating = 500
             };
 
-            var response = await Client.PostJsonAsync("/api/cars/add", invalidCar);
+            var response = await Client.PostJsonAsync("/api/v1/cars/add", invalidCar);
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -58,9 +58,9 @@ namespace WebAPI.IntegrationTests
         {
             var brandId = await AddBrandAsync("Toyota");
             var colorId = await AddColorAsync("Red");
-            await Client.PostJsonAsync("/api/cars/add", NewCar(brandId, colorId));
+            await Client.PostJsonAsync("/api/v1/cars/add", NewCar(brandId, colorId));
 
-            var response = await Client.GetJsonAsync("/api/cars/getcardetails");
+            var response = await Client.GetJsonAsync("/api/v1/cars/getcardetails");
             var details = await response.ReadAsAsync<DataResult<List<CarDetailDto>>>();
 
             var detail = Assert.Single(details.Data);
@@ -74,16 +74,16 @@ namespace WebAPI.IntegrationTests
         {
             var brandId = await AddBrandAsync("Toyota");
             var colorId = await AddColorAsync("Red");
-            await Client.PostJsonAsync("/api/cars/add", NewCar(brandId, colorId));
+            await Client.PostJsonAsync("/api/v1/cars/add", NewCar(brandId, colorId));
 
             // First call fills the cache that the caching aspect keeps for this method.
-            var firstCall = await Client.GetJsonAsync($"/api/cars/getcarsbybrandid?brandId={brandId}");
+            var firstCall = await Client.GetJsonAsync($"/api/v1/cars/getcarsbybrandid?brandId={brandId}");
             var firstResult = await firstCall.ReadAsAsync<DataResult<List<CarDetailDto>>>();
             Assert.Single(firstResult.Data);
 
-            await Client.PostJsonAsync("/api/cars/add", NewCar(brandId, colorId, "Corolla 1.8"));
+            await Client.PostJsonAsync("/api/v1/cars/add", NewCar(brandId, colorId, "Corolla 1.8"));
 
-            var secondCall = await Client.GetJsonAsync($"/api/cars/getcarsbybrandid?brandId={brandId}");
+            var secondCall = await Client.GetJsonAsync($"/api/v1/cars/getcarsbybrandid?brandId={brandId}");
             var secondResult = await secondCall.ReadAsAsync<DataResult<List<CarDetailDto>>>();
 
             Assert.Equal(2, secondResult.Data.Count);
@@ -96,10 +96,10 @@ namespace WebAPI.IntegrationTests
             var brandId = await AddBrandAsync("Toyota");
             var red = await AddColorAsync("Red");
             var blue = await AddColorAsync("Blue");
-            await Client.PostJsonAsync("/api/cars/add", NewCar(brandId, red, "Red car"));
-            await Client.PostJsonAsync("/api/cars/add", NewCar(brandId, blue, "Blue car"));
+            await Client.PostJsonAsync("/api/v1/cars/add", NewCar(brandId, red, "Red car"));
+            await Client.PostJsonAsync("/api/v1/cars/add", NewCar(brandId, blue, "Blue car"));
 
-            var response = await Client.GetJsonAsync($"/api/cars/getcarsbycolorid?colorId={blue}");
+            var response = await Client.GetJsonAsync($"/api/v1/cars/getcarsbycolorid?colorId={blue}");
             var result = await response.ReadAsAsync<DataResult<List<CarDetailDto>>>();
 
             var car = Assert.Single(result.Data);
@@ -121,9 +121,9 @@ namespace WebAPI.IntegrationTests
 
         private async Task<int> AddBrandAsync(string brandName)
         {
-            await Client.PostJsonAsync("/api/brands/add", new Brand { BrandName = brandName });
+            await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = brandName });
 
-            var brands = await Client.GetJsonAsync("/api/brands/getall");
+            var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
             var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
 
             return listed.Data.Single(b => b.BrandName == brandName).Id;
@@ -131,9 +131,9 @@ namespace WebAPI.IntegrationTests
 
         private async Task<int> AddColorAsync(string colorName)
         {
-            await Client.PostJsonAsync("/api/colors/add", new Color { ColorName = colorName });
+            await Client.PostJsonAsync("/api/v1/colors/add", new Color { ColorName = colorName });
 
-            var colors = await Client.GetJsonAsync("/api/colors/getall");
+            var colors = await Client.GetJsonAsync("/api/v1/colors/getall");
             var listed = await colors.ReadAsAsync<DataResult<List<Color>>>();
 
             return listed.Data.Single(c => c.ColorName == colorName).Id;
