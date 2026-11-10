@@ -1,0 +1,25 @@
+info:
+  name: Replace
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v2/users/{{userId}}"
+  body:
+    type: json
+    data: |
+      {
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "{{email}}",
+        "password": "Password123!",
+        "findeksRating": 1200
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

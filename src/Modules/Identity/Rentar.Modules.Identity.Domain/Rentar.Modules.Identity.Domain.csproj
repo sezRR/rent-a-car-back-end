@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Non-nullable strings and arrays map to required columns. -->
+    <Nullable>annotations</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Kernel/Rentar.Shared.Kernel.csproj" />
+  </ItemGroup>
+
+</Project>

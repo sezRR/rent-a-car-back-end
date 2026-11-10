@@ -13,6 +13,8 @@ variables:
     value: "1"
   - name: customerId
     value: "1"
+  - name: rentalId
+    value: "1"
   - name: userId
     value: "1"
   - name: email
@@ -20,6 +22,6 @@ variables:
   - name: findeksRating
     value: "1000"
   - name: imageFilePath
-    value: ../src/WebAPI/wwwroot/uploads/default.png
+    value: ../src/Bootstrapper/Rentar.Api/wwwroot/uploads/default.png
   - name: carImageFileName
     value: replace-with-current-image-file-name.jpg

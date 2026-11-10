@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Building blocks every module may use: result types, entity markers and business rule helpers. No dependencies. -->
+
+</Project>

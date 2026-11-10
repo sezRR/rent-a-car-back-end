@@ -1,0 +1,22 @@
+info:
+  name: Create
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v2/customers"
+  body:
+    type: json
+    data: |
+      {
+        "userId": {{userId}},
+        "companyName": "Example Company"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Composition root of the Findeks module: adapters plus the registration the host calls. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Rentar.Modules.Findeks.Application/Rentar.Modules.Findeks.Application.csproj" />
+    <ProjectReference Include="../Rentar.Modules.Findeks.Presentation/Rentar.Modules.Findeks.Presentation.csproj" />
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Infrastructure/Rentar.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

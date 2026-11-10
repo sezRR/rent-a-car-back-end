@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../Rentar.Modules.Rentals.Contracts/Rentar.Modules.Rentals.Contracts.csproj" />
+    <ProjectReference Include="../Rentar.Modules.Rentals.Domain/Rentar.Modules.Rentals.Domain.csproj" />
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Application/Rentar.Shared.Application.csproj" />
+    <ProjectReference Include="../../Customers/Rentar.Modules.Customers.Contracts/Rentar.Modules.Customers.Contracts.csproj" />
+    <ProjectReference Include="../../Fleet/Rentar.Modules.Fleet.Contracts/Rentar.Modules.Fleet.Contracts.csproj" />
+    <ProjectReference Include="../../Identity/Rentar.Modules.Identity.Contracts/Rentar.Modules.Identity.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

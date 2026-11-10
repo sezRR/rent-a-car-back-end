@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../Rentar.Modules.Identity.Contracts/Rentar.Modules.Identity.Contracts.csproj" />
+    <ProjectReference Include="../Rentar.Modules.Identity.Domain/Rentar.Modules.Identity.Domain.csproj" />
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Application/Rentar.Shared.Application.csproj" />
+  </ItemGroup>
+
+</Project>

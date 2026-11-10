@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- The host composes the modules through their Infrastructure projects and nothing else. -->
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Modules/Customers/Rentar.Modules.Customers.Infrastructure/Rentar.Modules.Customers.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Findeks/Rentar.Modules.Findeks.Infrastructure/Rentar.Modules.Findeks.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Fleet/Rentar.Modules.Fleet.Infrastructure/Rentar.Modules.Fleet.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Identity/Rentar.Modules.Identity.Infrastructure/Rentar.Modules.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Payments/Rentar.Modules.Payments.Infrastructure/Rentar.Modules.Payments.Infrastructure.csproj" />
+    <ProjectReference Include="../../Modules/Rentals/Rentar.Modules.Rentals.Infrastructure/Rentar.Modules.Rentals.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
