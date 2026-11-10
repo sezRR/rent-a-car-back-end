@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Public surface of the Rentals module: the only Rentals project other modules may reference. -->
+
+</Project>

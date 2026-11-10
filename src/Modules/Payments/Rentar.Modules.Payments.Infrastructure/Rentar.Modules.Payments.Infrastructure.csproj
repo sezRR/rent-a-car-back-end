@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Composition root of the Payments module: adapters plus the registration the host calls. -->
+
+  <ItemGroup>
+    <ProjectReference Include="../Rentar.Modules.Payments.Application/Rentar.Modules.Payments.Application.csproj" />
+    <ProjectReference Include="../Rentar.Modules.Payments.Presentation/Rentar.Modules.Payments.Presentation.csproj" />
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Infrastructure/Rentar.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

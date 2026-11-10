@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Public surface of the Identity module: the only Identity project other modules may reference. -->
+
+</Project>

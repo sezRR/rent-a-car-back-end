@@ -1,0 +1,9 @@
+root = true
+
+[*.cs]
+dotnet_diagnostic.IDE0005.severity = warning
+csharp_style_namespace_declarations = file_scoped:warning
+
+# A constructor that only stores its parameters becomes a primary constructor (IDE0290); `dotnet format` converts it.
+csharp_style_prefer_primary_constructors = true:warning
+dotnet_diagnostic.IDE0290.severity = warning

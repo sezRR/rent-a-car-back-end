@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Public surface of the Findeks module: the only Findeks project other modules may reference. -->
+
+</Project>

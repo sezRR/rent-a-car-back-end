@@ -1,0 +1,26 @@
+info:
+  name: Replace
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/v2/cars/{{carId}}"
+  body:
+    type: json
+    data: |
+      {
+        "brandId": {{brandId}},
+        "colorId": {{colorId}},
+        "modelYear": 2026,
+        "dailyPrice": 150.00,
+        "description": "Example rental car",
+        "minimumFindeksRating": 1000
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

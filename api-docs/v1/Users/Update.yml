@@ -1,0 +1,26 @@
+info:
+  name: Update
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/users/update"
+  body:
+    type: json
+    data: |
+      {
+        "id": {{userId}},
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "{{email}}",
+        "password": "Password123!",
+        "findeksRating": 1000
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

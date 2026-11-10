@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The host pulls in every module and shared project, so all of them land next to the tests. -->
+    <ProjectReference Include="../../Bootstrapper/Rentar.Api/Rentar.Api.csproj" />
+  </ItemGroup>
+
+</Project>

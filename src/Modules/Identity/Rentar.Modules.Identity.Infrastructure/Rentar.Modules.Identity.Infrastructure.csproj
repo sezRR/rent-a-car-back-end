@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Composition root of the Identity module: adapters plus the registration the host calls. -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rentar.Modules.Identity.Application/Rentar.Modules.Identity.Application.csproj" />
+    <ProjectReference Include="../Rentar.Modules.Identity.Presentation/Rentar.Modules.Identity.Presentation.csproj" />
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Infrastructure/Rentar.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

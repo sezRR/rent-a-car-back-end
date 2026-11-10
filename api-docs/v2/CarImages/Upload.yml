@@ -1,0 +1,22 @@
+info:
+  name: Upload
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v2/cars/{{carId}}/images"
+  body:
+    type: multipart-form
+    data:
+      - name: file
+        type: file
+        value:
+          - "{{imageFilePath}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

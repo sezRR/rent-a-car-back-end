@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Composition root of the Rentals module: adapters plus the registration the host calls. -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rentar.Modules.Rentals.Application/Rentar.Modules.Rentals.Application.csproj" />
+    <ProjectReference Include="../Rentar.Modules.Rentals.Presentation/Rentar.Modules.Rentals.Presentation.csproj" />
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Infrastructure/Rentar.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

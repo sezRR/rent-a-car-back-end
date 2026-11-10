@@ -1,0 +1,22 @@
+info:
+  name: Add
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/customers/add"
+  body:
+    type: json
+    data: |
+      {
+        "userId": {{userId}},
+        "companyName": "Example Company"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

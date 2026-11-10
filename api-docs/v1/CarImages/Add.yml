@@ -1,0 +1,25 @@
+info:
+  name: Add
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/carimages/add"
+  body:
+    type: multipart-form
+    data:
+      - name: carId
+        type: text
+        value: "{{carId}}"
+      - name: file
+        type: file
+        value:
+          - "{{imageFilePath}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

@@ -1,0 +1,27 @@
+info:
+  name: Delete
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/cars/delete"
+  body:
+    type: json
+    data: |
+      {
+        "id": {{carId}},
+        "brandId": {{brandId}},
+        "colorId": {{colorId}},
+        "modelYear": 2026,
+        "dailyPrice": 125.00,
+        "description": "Example rental car",
+        "minimumFindeksRating": 1000
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

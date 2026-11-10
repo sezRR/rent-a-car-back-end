@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../../Shared/Rentar.Shared.Kernel/Rentar.Shared.Kernel.csproj" />
+  </ItemGroup>
+
+</Project>
