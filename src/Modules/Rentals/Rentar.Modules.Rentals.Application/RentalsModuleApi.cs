@@ -8,6 +8,6 @@ public class RentalsModuleApi(IRentalService rentalService) : IRentalsModuleApi
 {
     public bool IsCarAvailable(int carId, DateTime rentDate, DateTime returnDate)
     {
-        return rentalService.IsRentable(new Rental { CarId = carId, RentDate = rentDate, ReturnDate = returnDate }).Success;
+        return rentalService.IsRentable(new Rental { CarId = carId, RentDate = rentDate, ReturnDate = returnDate });
     }
 }

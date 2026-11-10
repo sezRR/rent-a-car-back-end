@@ -1,15 +1,20 @@
 using Rentar.Modules.Fleet.Domain;
-using Rentar.Shared.Kernel.Results;
 using System.Collections.Generic;
 
 namespace Rentar.Modules.Fleet.Application.Colors;
 
 public interface IColorService
 {
-    IDataResult<List<Color>> GetAll();
-    IDataResult<Color> GetById(int colorId);
+    List<Color> GetAll();
 
-    IResult Add(Color color);
-    IResult Update(Color color);
-    IResult Delete(Color color);
+    /// <returns>The color, or <c>null</c> when there is none with that id.</returns>
+    Color GetById(int colorId);
+
+    void Add(Color color);
+
+    /// <exception cref="Rentar.Shared.Kernel.Exceptions.BusinessRuleException">The name is shorter than two characters.</exception>
+    void Update(Color color);
+
+    /// <exception cref="Rentar.Shared.Kernel.Exceptions.BusinessRuleException">The name is shorter than two characters.</exception>
+    void Delete(Color color);
 }

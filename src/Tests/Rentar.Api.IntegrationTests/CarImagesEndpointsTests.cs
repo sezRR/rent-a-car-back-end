@@ -3,7 +3,7 @@ using Rentar.Modules.Fleet.Application.CarImages;
 using Rentar.Modules.Fleet.Application;
 using Rentar.Modules.Fleet.Domain;
 using Rentar.Modules.Fleet.Infrastructure.Storage;
-using Rentar.Shared.Kernel.Results;
+using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -153,7 +153,7 @@ public class CarImagesEndpointsTests(RentarApiFactory factory) : IntegrationTest
         var stored = UploadedFile(images.Single(i => i.ImagePath != IImageStorage.DefaultImageName).ImagePath);
 
         var cars = await Client.GetJsonAsync("/api/v1/cars/getall");
-        var car = (await cars.ReadAsAsync<DataResult<List<Car>>>()).Data.Single();
+        var car = (await cars.ReadAsAsync<V1Response<List<Car>>>()).Data.Single();
         var response = await Client.PostJsonAsync("/api/v1/cars/delete", car);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -218,7 +218,7 @@ public class CarImagesEndpointsTests(RentarApiFactory factory) : IntegrationTest
     {
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-        var result = await response.ReadAsAsync<Result>();
+        var result = await response.ReadAsAsync<V1Response>();
         Assert.Equal(Messages.CarImageInvalidFile, result.Message);
     }
 
@@ -236,7 +236,7 @@ public class CarImagesEndpointsTests(RentarApiFactory factory) : IntegrationTest
     private async Task<List<CarImage>> GetImagesAsync(int carId)
     {
         var response = await Client.GetJsonAsync($"/api/v1/carimages/getbycarid?carId={carId}");
-        var result = await response.ReadAsAsync<DataResult<List<CarImage>>>();
+        var result = await response.ReadAsAsync<V1Response<List<CarImage>>>();
         return result.Data;
     }
 
@@ -257,7 +257,7 @@ public class CarImagesEndpointsTests(RentarApiFactory factory) : IntegrationTest
         await Client.PostJsonAsync("/api/v1/cars/add", car);
 
         var cars = await Client.GetJsonAsync("/api/v1/cars/getall");
-        var listed = await cars.ReadAsAsync<DataResult<List<Car>>>();
+        var listed = await cars.ReadAsAsync<V1Response<List<Car>>>();
         return listed.Data.Single().Id;
     }
 }

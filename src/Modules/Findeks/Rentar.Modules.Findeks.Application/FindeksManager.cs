@@ -1,12 +1,11 @@
 using Rentar.Modules.Findeks.Domain;
-using Rentar.Shared.Kernel.Results;
 using System;
 
 namespace Rentar.Modules.Findeks.Application;
 
 public class FindeksManager : IFindeksService
 {
-    public IDataResult<int> CalculateFindeksRating()
+    public int CalculateFindeksRating()
     {
         // No credit bureau is connected, so each factor is simulated up to its maximum.
         var report = new FindeksReport
@@ -26,6 +25,6 @@ public class FindeksManager : IFindeksService
 
         report.MinimumFindeksRating = findeksRating;
 
-        return new SuccessDataResult<int>(findeksRating, Messages.FindeksRatingCalculated);
+        return findeksRating;
     }
 }

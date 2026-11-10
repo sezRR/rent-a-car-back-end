@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Customers.Application;
 using Rentar.Modules.Customers.Domain;
 using Rentar.Shared.Presentation.Endpoints;
+using System.Collections.Generic;
 
 namespace Rentar.Modules.Customers.Presentation.Endpoints.V1;
 
@@ -18,21 +19,19 @@ public class CustomersEndpoints : IEndpoint
         group.MapPost("/add", Add);
     }
 
-    private static IResult GetAll(ICustomerService customerService)
+    private static Ok<V1Response<List<Customer>>> GetAll(ICustomerService customerService)
     {
-        var result = customerService.GetAll();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(customerService.GetAll(), Messages.CustomersListed);
     }
 
-    private static IResult GetCustomersByUserId(ICustomerService customerService, int userId)
+    private static Ok<V1Response<List<Customer>>> GetCustomersByUserId(ICustomerService customerService, int userId)
     {
-        var result = customerService.GetCustomersByUserId(userId);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(customerService.GetCustomersByUserId(userId), null);
     }
 
-    private static IResult Add(ICustomerService customerService, Customer customer)
+    private static Ok<V1Response> Add(ICustomerService customerService, Customer customer)
     {
-        var result = customerService.Add(customer);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        customerService.Add(customer);
+        return V1Results.Ok(Messages.CustomerAdded);
     }
 }

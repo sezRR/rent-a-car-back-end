@@ -1,7 +1,7 @@
 using Rentar.Modules.Identity.Application.Security;
 using Rentar.Modules.Identity.Domain;
 using Rentar.Shared.Application.Aspects.Validation;
-using Rentar.Shared.Kernel.Results;
+using Rentar.Shared.Kernel.Exceptions;
 using System;
 using System.Collections.Generic;
 
@@ -13,32 +13,29 @@ public class UserManager(IUserDal userDal, TimeProvider timeProvider) : IUserSer
     private readonly TimeProvider _timeProvider = timeProvider;
 
     [ValidationAspect(typeof(UserValidator))]
-    public IResult Add(User user)
+    public void Add(User user)
     {
         _userDal.Add(user);
-
-        return new SuccessResult(Messages.UserAdded);
     }
 
-    public IResult Delete(User user)
+    public void Delete(User user)
     {
         if (user.FirstName.Length < 2)
         {
-            return new ErrorResult(Messages.UserFirstNameInvalid);
+            throw new BusinessRuleException(Messages.UserFirstNameInvalid);
         }
-        _userDal.Delete(user);
 
-        return new SuccessResult(Messages.UserDeleted);
+        _userDal.Delete(user);
     }
 
-    public IDataResult<List<User>> GetAll()
+    public List<User> GetAll()
     {
         if (_timeProvider.GetLocalNow().Hour == 22)
         {
-            return new ErrorDataResult<List<User>>(Messages.MaintenanceTime);
+            throw new UnavailableException(Messages.MaintenanceTime);
         }
 
-        return new SuccessDataResult<List<User>>(_userDal.GetAll(), Messages.UsersListed);
+        return _userDal.GetAll();
     }
 
     public User GetByMail(string email)
@@ -51,12 +48,7 @@ public class UserManager(IUserDal userDal, TimeProvider timeProvider) : IUserSer
         return _userDal.GetClaims(user);
     }
 
-    public IDataResult<User> GetUserByMail(string email)
-    {
-        return new SuccessDataResult<User>(_userDal.Get(e => e.Email == email));
-    }
-
-    public IResult Update(UserForUpdateDto userForUpdateDto)
+    public User Update(UserForUpdateDto userForUpdateDto)
     {
         HashingHelper.CreatePasswordHash(userForUpdateDto.Password, out var passwordHash, out var passwordSalt);
 
@@ -73,16 +65,16 @@ public class UserManager(IUserDal userDal, TimeProvider timeProvider) : IUserSer
         };
 
         _userDal.Update(user);
-        return new SuccessDataResult<User>(user, Messages.UserUpdated);
+        return user;
     }
 
-    public IDataResult<List<User>> GetUserFindeksRating(int findeksRating)
+    public List<User> GetUserFindeksRating(int findeksRating)
     {
-        return new SuccessDataResult<List<User>>(_userDal.GetAll(u => u.FindeksRating >= findeksRating));
+        return _userDal.GetAll(u => u.FindeksRating >= findeksRating);
     }
 
-    public IDataResult<User> GetUserById(int id)
+    public User GetById(int id)
     {
-        return new SuccessDataResult<User>(_userDal.Get(u => u.Id == id));
+        return _userDal.Get(u => u.Id == id);
     }
 }

@@ -1,8 +1,7 @@
-using Rentar.Shared.Kernel.Results;
-
 namespace Rentar.Modules.Payments.Application;
 
 public interface IPaymentService
 {
-    IResult Pay();
+    /// <returns><c>true</c> when the payment went through, <c>false</c> when it was declined.</returns>
+    bool Pay();
 }

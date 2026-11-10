@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Rentar.Modules.Identity.Application;
 using Rentar.Modules.Identity.Application.Users;
 using Rentar.Modules.Identity.Domain;
 using Rentar.Shared.Presentation.Endpoints;
+using System.Collections.Generic;
 
 namespace Rentar.Modules.Identity.Presentation.Endpoints.V1;
 
@@ -21,39 +23,34 @@ public class UsersEndpoints : IEndpoint
         group.MapPost("/update", Update);
     }
 
-    private static IResult GetAll(IUserService userService)
+    private static Ok<V1Response<List<User>>> GetAll(IUserService userService)
     {
-        var result = userService.GetAll();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(userService.GetAll(), Messages.UsersListed);
     }
 
-    private static IResult GetByMail(IUserService userService, string email)
+    private static Ok<V1Response<User>> GetByMail(IUserService userService, string email)
     {
-        var result = userService.GetUserByMail(email);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(userService.GetByMail(email), null);
     }
 
-    private static IResult GetUserFindeksRating(IUserService userService, int findeksRating)
+    private static Ok<V1Response<List<User>>> GetUserFindeksRating(IUserService userService, int findeksRating)
     {
-        var result = userService.GetUserFindeksRating(findeksRating);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(userService.GetUserFindeksRating(findeksRating), null);
     }
 
-    private static IResult GetUserById(IUserService userService, int id)
+    private static Ok<V1Response<User>> GetUserById(IUserService userService, int id)
     {
-        var result = userService.GetUserById(id);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(userService.GetById(id), null);
     }
 
-    private static IResult Add(IUserService userService, User user)
+    private static Ok<V1Response> Add(IUserService userService, User user)
     {
-        var result = userService.Add(user);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        userService.Add(user);
+        return V1Results.Ok(Messages.UserAdded);
     }
 
-    private static IResult Update(IUserService userService, UserForUpdateDto userForUpdateDto)
+    private static Ok<V1Response<User>> Update(IUserService userService, UserForUpdateDto userForUpdateDto)
     {
-        var result = userService.Update(userForUpdateDto);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(userService.Update(userForUpdateDto), Messages.UserUpdated);
     }
 }

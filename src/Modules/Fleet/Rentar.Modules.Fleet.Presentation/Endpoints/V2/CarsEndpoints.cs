@@ -30,12 +30,9 @@ public class CarsEndpoints : IEndpoint
     /// <summary>
     /// Lists cars, optionally only those of a brand, a color, or both.
     /// </summary>
-    private static Results<Ok<List<CarResponse>>, ProblemHttpResult> GetAll(
-        ICarService carService,
-        int? brandId,
-        int? colorId)
+    private static Ok<List<CarResponse>> GetAll(ICarService carService, int? brandId, int? colorId)
     {
-        var result = (brandId, colorId) switch
+        var cars = (brandId, colorId) switch
         {
             ({ } brand, { } color) => carService.GetCarsByColorAndBrandId(brand, color),
             ({ } brand, null) => carService.GetCarsByBrandId(brand),
@@ -43,43 +40,33 @@ public class CarsEndpoints : IEndpoint
             _ => carService.GetCarDetails()
         };
 
-        return result.Success
-            ? TypedResults.Ok(result.Data.ConvertAll(CarResponse.From))
-            : RestResults.Problem(result);
+        return TypedResults.Ok(cars.ConvertAll(CarResponse.From));
     }
 
     private static Results<Ok<CarResponse>, ProblemHttpResult> GetById(ICarService carService, int id)
     {
-        var car = carService.GetCarDetailsById(id).Data;
+        var car = carService.GetCarDetailsById(id);
         return car is null ? RestResults.NotFound("Car", id) : TypedResults.Ok(CarResponse.From(car));
     }
 
-    private static Results<Created<CarResponse>, ProblemHttpResult> Create(
-        ICarService carService,
-        HttpRequest request,
-        CarRequest body)
+    private static Created<CarResponse> Create(ICarService carService, HttpRequest request, CarRequest body)
     {
         var car = ToCar(0, body);
+        carService.Add(car);
 
-        var result = carService.Add(car);
-        if (!result.Success)
-        {
-            return RestResults.Problem(result);
-        }
-
-        var created = carService.GetCarDetailsById(car.Id).Data;
+        var created = carService.GetCarDetailsById(car.Id);
         return RestResults.Created(request, car.Id, created is null ? CarResponse.From(car) : CarResponse.From(created));
     }
 
     private static Results<NoContent, ProblemHttpResult> Update(ICarService carService, int id, CarRequest body)
     {
-        if (carService.GetById(id).Data is null)
+        if (carService.GetById(id) is null)
         {
             return RestResults.NotFound("Car", id);
         }
 
-        var result = carService.Update(ToCar(id, body));
-        return result.Success ? TypedResults.NoContent() : RestResults.Problem(result);
+        carService.Update(ToCar(id, body));
+        return TypedResults.NoContent();
     }
 
     /// <summary>
@@ -87,14 +74,14 @@ public class CarsEndpoints : IEndpoint
     /// </summary>
     private static Results<NoContent, ProblemHttpResult> Delete(ICarService carService, int id)
     {
-        var car = carService.GetById(id).Data;
+        var car = carService.GetById(id);
         if (car is null)
         {
             return RestResults.NotFound("Car", id);
         }
 
-        var result = carService.Delete(car);
-        return result.Success ? TypedResults.NoContent() : RestResults.Problem(result);
+        carService.Delete(car);
+        return TypedResults.NoContent();
     }
 
     private static Car ToCar(int id, CarRequest body)

@@ -4,7 +4,6 @@ using Rentar.Shared.Application.Aspects.Caching;
 using Rentar.Shared.Application.Aspects.Performance;
 using Rentar.Shared.Application.Aspects.Transaction;
 using Rentar.Shared.Application.Aspects.Validation;
-using Rentar.Shared.Kernel.Results;
 using System.Collections.Generic;
 
 namespace Rentar.Modules.Fleet.Application.Cars;
@@ -16,89 +15,75 @@ public class CarManager(ICarDal carDal, ICarImageService carImageService) : ICar
 
     [ValidationAspect(typeof(CarValidator))]
     [CacheRemoveAspect("ICarService.Get")]
-    public IResult Add(Car car)
+    public void Add(Car car)
     {
         _carDal.Add(car);
-
-        return new SuccessResult(Messages.CarAdded);
     }
 
-    public IResult Update(Car car)
+    public void Update(Car car)
     {
         _carDal.Update(car);
-
-        return new SuccessResult(Messages.CarUpdated);
     }
 
     [TransactionScopeAspect]
-    public IResult Delete(Car car)
+    public void Delete(Car car)
     {
         // Images are not tied to the car by a foreign key, so their rows and files are removed here.
-        foreach (var carImage in _carImageService.GetByCarId(car.Id).Data)
+        foreach (var carImage in _carImageService.GetByCarId(car.Id))
         {
             _carImageService.Delete(carImage);
         }
 
         _carDal.Delete(car);
-
-        return new SuccessResult(Messages.CarDeleted);
     }
 
     [PerformanceAspect(5)]
-    public IDataResult<List<Car>> GetAll()
+    public List<Car> GetAll()
     {
-        return new SuccessDataResult<List<Car>>(_carDal.GetAll(), Messages.CarsListed);
+        return _carDal.GetAll();
     }
 
-    public IDataResult<Car> GetById(int id)
+    public Car GetById(int id)
     {
-        return new SuccessDataResult<Car>(_carDal.Get(c => c.Id == id));
+        return _carDal.Get(c => c.Id == id);
     }
 
-    public IDataResult<List<CarDetailDto>> GetCarDetails()
+    public List<CarDetailDto> GetCarDetails()
     {
-        return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails());
+        return _carDal.GetCarDetails();
     }
 
     [CacheAspect(duration: 10)]
-    public IDataResult<List<CarDetailDto>> GetCarsByBrandId(int brandId)
+    public List<CarDetailDto> GetCarsByBrandId(int brandId)
     {
-        return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails(c => c.BrandId == brandId));
+        return _carDal.GetCarDetails(c => c.BrandId == brandId);
     }
 
-    public IDataResult<List<CarDetailDto>> GetCarsByColorId(int colorId)
+    public List<CarDetailDto> GetCarsByColorId(int colorId)
     {
-        return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails(c => c.ColorId == colorId), Messages.CarsListed);
+        return _carDal.GetCarDetails(c => c.ColorId == colorId);
     }
 
     [TransactionScopeAspect]
-    public IResult TransactionalOperation(Car car)
+    public void TransactionalOperation(Car car)
     {
         _carDal.Update(car);
         _carDal.Add(car);
-        return new SuccessResult(Messages.CarUpdated);
     }
 
-    public IDataResult<CarDetailDto> GetCarDetailsById(int id)
+    public CarDetailDto GetCarDetailsById(int id)
     {
-        return new SuccessDataResult<CarDetailDto>(_carDal.GetCarDetailsById(c => c.Id == id));
+        return _carDal.GetCarDetailsById(c => c.Id == id);
     }
 
-    public IDataResult<List<CarDetailDto>> GetCarsByColorAndBrandId(int brandId, int colorId)
+    public List<CarDetailDto> GetCarsByColorAndBrandId(int brandId, int colorId)
     {
-        var cars = _carDal.GetCarDetails(b => b.BrandId == brandId && b.ColorId == colorId);
-        if (cars == null)
-        {
-            return new ErrorDataResult<List<CarDetailDto>>(Messages.TheCarNotFound);
-        }
-
-        return new SuccessDataResult<List<CarDetailDto>>(cars);
+        return _carDal.GetCarDetails(b => b.BrandId == brandId && b.ColorId == colorId);
     }
 
-    public IDataResult<Car> AddReturnableData(Car car)
+    public Car AddReturnableData(Car car)
     {
         _carDal.Add(car);
-
-        return new SuccessDataResult<Car>(car);
+        return car;
     }
 }

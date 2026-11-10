@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Rentar.Modules.Fleet.Application;
 using Rentar.Modules.Fleet.Application.Cars;
 using Rentar.Modules.Fleet.Domain;
 using Rentar.Shared.Presentation.Endpoints;
+using System.Collections.Generic;
 
 namespace Rentar.Modules.Fleet.Presentation.Endpoints.V1;
 
@@ -25,63 +27,56 @@ public class CarsEndpoints : IEndpoint
         group.MapPost("/delete", Delete);
     }
 
-    private static IResult GetAll(ICarService carService)
+    private static Ok<V1Response<List<Car>>> GetAll(ICarService carService)
     {
-        var result = carService.GetAll();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carService.GetAll(), Messages.CarsListed);
     }
 
-    private static IResult GetCarDetails(ICarService carService)
+    private static Ok<V1Response<List<CarDetailDto>>> GetCarDetails(ICarService carService)
     {
-        var result = carService.GetCarDetails();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carService.GetCarDetails(), null);
     }
 
-    private static IResult GetCarDetailsById(ICarService carService, int id)
+    private static Ok<V1Response<CarDetailDto>> GetCarDetailsById(ICarService carService, int id)
     {
-        var result = carService.GetCarDetailsById(id);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carService.GetCarDetailsById(id), null);
     }
 
-    private static IResult GetByBrandId(ICarService carService, int brandId)
+    private static Ok<V1Response<List<CarDetailDto>>> GetByBrandId(ICarService carService, int brandId)
     {
-        var result = carService.GetCarsByBrandId(brandId);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carService.GetCarsByBrandId(brandId), null);
     }
 
-    private static IResult GetByColorId(ICarService carService, int colorId)
+    private static Ok<V1Response<List<CarDetailDto>>> GetByColorId(ICarService carService, int colorId)
     {
-        var result = carService.GetCarsByColorId(colorId);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carService.GetCarsByColorId(colorId), Messages.CarsListed);
     }
 
-    private static IResult GetCarsByBrandIdAndColorId(ICarService carService, int brandId, int colorId)
+    private static Ok<V1Response<List<CarDetailDto>>> GetCarsByBrandIdAndColorId(ICarService carService, int brandId, int colorId)
     {
-        var result = carService.GetCarsByColorAndBrandId(brandId, colorId);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carService.GetCarsByColorAndBrandId(brandId, colorId), null);
     }
 
-    private static IResult Add(ICarService carService, Car car)
+    private static Ok<V1Response> Add(ICarService carService, Car car)
     {
-        var result = carService.Add(car);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        carService.Add(car);
+        return V1Results.Ok(Messages.CarAdded);
     }
 
-    private static IResult AddReturnableData(ICarService carService, Car car)
+    private static Ok<V1Response<Car>> AddReturnableData(ICarService carService, Car car)
     {
-        var result = carService.AddReturnableData(car);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carService.AddReturnableData(car), null);
     }
 
-    private static IResult Update(ICarService carService, Car car)
+    private static Ok<V1Response> Update(ICarService carService, Car car)
     {
-        var result = carService.Update(car);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        carService.Update(car);
+        return V1Results.Ok(Messages.CarUpdated);
     }
 
-    private static IResult Delete(ICarService carService, Car car)
+    private static Ok<V1Response> Delete(ICarService carService, Car car)
     {
-        var result = carService.Delete(car);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        carService.Delete(car);
+        return V1Results.Ok(Messages.CarDeleted);
     }
 }

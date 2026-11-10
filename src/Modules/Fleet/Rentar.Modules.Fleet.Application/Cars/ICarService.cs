@@ -1,24 +1,34 @@
 using Rentar.Modules.Fleet.Domain;
-using Rentar.Shared.Kernel.Results;
 using System.Collections.Generic;
 
 namespace Rentar.Modules.Fleet.Application.Cars;
 
 public interface ICarService
 {
-    IDataResult<List<Car>> GetAll();
-    IDataResult<Car> GetById(int id);
-    IDataResult<List<CarDetailDto>> GetCarsByBrandId(int brandId);
-    IDataResult<List<CarDetailDto>> GetCarsByColorId(int colorId);
-    IDataResult<List<CarDetailDto>> GetCarsByColorAndBrandId(int brandId, int colorId);
+    List<Car> GetAll();
 
-    IResult Add(Car car);
-    IDataResult<Car> AddReturnableData(Car car);
-    IResult Update(Car car);
-    IResult Delete(Car car);
+    /// <returns>The car, or <c>null</c> when there is none with that id.</returns>
+    Car GetById(int id);
 
-    IDataResult<List<CarDetailDto>> GetCarDetails();
-    IDataResult<CarDetailDto> GetCarDetailsById(int id);
+    List<CarDetailDto> GetCarsByBrandId(int brandId);
+    List<CarDetailDto> GetCarsByColorId(int colorId);
+    List<CarDetailDto> GetCarsByColorAndBrandId(int brandId, int colorId);
 
-    IResult TransactionalOperation(Car car);
+    /// <summary>Stores the car and sets its <see cref="Car.Id"/>.</summary>
+    void Add(Car car);
+
+    /// <summary>Stores the car, bypassing validation, and returns it with its id set.</summary>
+    Car AddReturnableData(Car car);
+
+    void Update(Car car);
+
+    /// <summary>Deletes the car together with its images and their files.</summary>
+    void Delete(Car car);
+
+    List<CarDetailDto> GetCarDetails();
+
+    /// <returns>The car's details, or <c>null</c> when there is no such car or its brand or color is not stored.</returns>
+    CarDetailDto GetCarDetailsById(int id);
+
+    void TransactionalOperation(Car car);
 }

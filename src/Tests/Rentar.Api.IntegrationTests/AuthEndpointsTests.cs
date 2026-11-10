@@ -1,4 +1,4 @@
-using Rentar.Shared.Kernel.Results;
+using Rentar.Shared.Presentation.Endpoints;
 using Rentar.Modules.Identity.Application.Auth;
 using System.Net;
 using System.Threading.Tasks;
@@ -18,7 +18,7 @@ public class AuthEndpointsTests(RentarApiFactory factory) : IntegrationTestBase(
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var result = await response.ReadAsAsync<DataResult<AccessToken>>();
+        var result = await response.ReadAsAsync<V1Response<AccessToken>>();
         Assert.True(result.Success);
         Assert.False(string.IsNullOrWhiteSpace(result.Data.Token));
         Assert.Equal(3, result.Data.Token.Split('.').Length);
@@ -32,7 +32,7 @@ public class AuthEndpointsTests(RentarApiFactory factory) : IntegrationTestBase(
         var response = await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        var result = await response.ReadAsAsync<Result>();
+        var result = await response.ReadAsAsync<V1Response>();
         Assert.False(result.Success);
         Assert.Equal("User already registered", result.Message);
     }
@@ -49,7 +49,7 @@ public class AuthEndpointsTests(RentarApiFactory factory) : IntegrationTestBase(
         });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var result = await response.ReadAsAsync<DataResult<AccessToken>>();
+        var result = await response.ReadAsAsync<V1Response<AccessToken>>();
         Assert.False(string.IsNullOrWhiteSpace(result.Data.Token));
     }
 

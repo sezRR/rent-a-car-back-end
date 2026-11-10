@@ -125,10 +125,10 @@ One deployable host, split into modules that each own their data and talk to eac
 src/
   Bootstrapper/Rentar.Api           host: composes the modules, nothing else
   Shared/
-    Rentar.Shared.Kernel            results, entity markers, business rules (no dependencies)
+    Rentar.Shared.Kernel            exceptions, entity markers (no dependencies)
     Rentar.Shared.Application       aspects (validation, caching, transaction, performance, security) + abstractions
     Rentar.Shared.Infrastructure    EF repository base, per-module DbContext wiring, cache, IModule
-    Rentar.Shared.Presentation      endpoint discovery, versioned route groups, exception middleware
+    Rentar.Shared.Presentation      endpoint discovery, versioned route groups, exception handler, v1 envelope
   Modules/<Module>/
     Rentar.Modules.<Module>.Contracts       public API other modules may call
     Rentar.Modules.<Module>.Domain          entities
@@ -167,7 +167,10 @@ Adding a module: create the five projects, implement `IModule` in its Infrastruc
 
 **Cross-cutting**
 
-- Results: `IResult` / `IDataResult<T>` with Success/Error variants (Kernel)
+- Errors: services return plain values and throw the Kernel exceptions (`BusinessRuleException`, `NotFoundException`,
+  `ConflictException`, `InvalidCredentialsException`, `UnavailableException`) when they refuse a request.
+  `ApiExceptionHandler`, an ASP.NET Core `IExceptionHandler`, turns them into problem details for v2 and into the
+  `{ success, message, data }` body for v1. `V1ContractTests` pins every v1 response.
 - Aspects via Autofac interceptors: validation (FluentValidation), caching, transaction scope, performance, secured operation
 - Security: HMACSHA512 password hashing, JWT access tokens (Identity module)
 - Uploaded car images are stored under `src/Bootstrapper/Rentar.Api/wwwroot/uploads` (`Paths:DefaultCarImagePath`)

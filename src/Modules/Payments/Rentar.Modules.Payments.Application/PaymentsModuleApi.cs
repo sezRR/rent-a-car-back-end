@@ -8,6 +8,6 @@ public class PaymentsModuleApi(IPaymentService paymentService) : IPaymentsModule
 
     public bool Pay()
     {
-        return _paymentService.Pay().Success;
+        return _paymentService.Pay();
     }
 }

@@ -21,16 +21,13 @@ public class AuthEndpoints : IEndpoint
             .ProducesProblem(StatusCodes.Status401Unauthorized);
     }
 
-    private static Results<Ok<AccessToken>, ProblemHttpResult> CreateToken(IAuthService authService, TokenRequest body)
+    /// <summary>
+    /// Bad credentials answer 401 with the same detail whatever was wrong, so the response does not reveal which
+    /// accounts exist.
+    /// </summary>
+    private static Ok<AccessToken> CreateToken(IAuthService authService, TokenRequest body)
     {
-        var login = authService.Login(new UserForLoginDto { Email = body.Email, Password = body.Password });
-        if (!login.Success)
-        {
-            // One answer for an unknown email and a wrong password, so the response does not reveal which accounts exist.
-            return TypedResults.Problem(detail: "Email or password is wrong.", statusCode: StatusCodes.Status401Unauthorized);
-        }
-
-        var result = authService.CreateAccessToken(login.Data);
-        return result.Success ? TypedResults.Ok(result.Data) : RestResults.Problem(result);
+        var user = authService.Login(new UserForLoginDto { Email = body.Email, Password = body.Password });
+        return TypedResults.Ok(authService.CreateAccessToken(user));
     }
 }

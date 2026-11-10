@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Rentar.Modules.Fleet.Application;
 using Rentar.Modules.Fleet.Application.Brands;
 using Rentar.Modules.Fleet.Domain;
 using Rentar.Shared.Presentation.Endpoints;
+using System.Collections.Generic;
 
 namespace Rentar.Modules.Fleet.Presentation.Endpoints.V1;
 
@@ -20,33 +22,31 @@ public class BrandsEndpoints : IEndpoint
         group.MapPost("/delete", Delete);
     }
 
-    private static IResult GetAll(IBrandService brandService)
+    private static Ok<V1Response<List<Brand>>> GetAll(IBrandService brandService)
     {
-        var result = brandService.GetAll();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(brandService.GetAll(), Messages.BrandsListed);
     }
 
-    private static IResult GetById(IBrandService brandService, int id)
+    private static Ok<V1Response<Brand>> GetById(IBrandService brandService, int id)
     {
-        var result = brandService.GetById(id);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(brandService.GetById(id), null);
     }
 
-    private static IResult Add(IBrandService brandService, Brand brand)
+    private static Ok<V1Response> Add(IBrandService brandService, Brand brand)
     {
-        var result = brandService.Add(brand);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        brandService.Add(brand);
+        return V1Results.Ok(Messages.BrandAdded);
     }
 
-    private static IResult Update(IBrandService brandService, Brand brand)
+    private static Ok<V1Response> Update(IBrandService brandService, Brand brand)
     {
-        var result = brandService.Update(brand);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        brandService.Update(brand);
+        return V1Results.Ok(Messages.BrandUpdated);
     }
 
-    private static IResult Delete(IBrandService brandService, Brand brand)
+    private static Ok<V1Response> Delete(IBrandService brandService, Brand brand)
     {
-        var result = brandService.Delete(brand);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        brandService.Delete(brand);
+        return V1Results.Ok(Messages.BrandDeleted);
     }
 }

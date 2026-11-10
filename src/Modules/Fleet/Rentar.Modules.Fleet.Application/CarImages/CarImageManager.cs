@@ -1,7 +1,6 @@
 using Rentar.Modules.Fleet.Domain;
 using Rentar.Shared.Application.Aspects.Transaction;
-using Rentar.Shared.Kernel.Business;
-using Rentar.Shared.Kernel.Results;
+using Rentar.Shared.Kernel.Exceptions;
 using System;
 using System.Collections.Generic;
 
@@ -14,96 +13,74 @@ public class CarImageManager(ICarImageDal carImageDal, IImageStorage imageStorag
     private readonly TimeProvider _timeProvider = timeProvider;
 
     [TransactionScopeAspect]
-    public IResult Add(CarImage carImage, FileUpload file)
+    public void Add(CarImage carImage, FileUpload file)
     {
-        var result = BusinessRules.Run(
-            CheckIfReachCarImageLimit(carImage.CarId),
-            CheckIfImageFileValid(file, allowMissing: true));
-
-        if (result != null)
-        {
-            return result;
-        }
+        EnsureCarImageLimitNotReached(carImage.CarId);
+        EnsureImageFileIsValid(file, allowMissing: true);
 
         carImage.ImagePath = file == null ? IImageStorage.DefaultImageName : _imageStorage.Save(file);
 
         _carImageDal.Add(carImage);
-
-        return new SuccessResult();
     }
 
     [TransactionScopeAspect]
-    public IResult Update(CarImage carImage, FileUpload file)
+    public void Update(CarImage carImage, FileUpload file)
     {
-        var result = BusinessRules.Run(CheckIfImageFileValid(file, allowMissing: false));
-
-        if (result != null)
-        {
-            return result;
-        }
+        EnsureImageFileIsValid(file, allowMissing: false);
 
         // The stored path is used, not the one sent by the client, so only this image's file is replaced.
-        var existing = _carImageDal.Get(c => c.Id == carImage.Id);
-        if (existing == null)
-        {
-            return new ErrorResult(Messages.CarImageNotFound);
-        }
+        var existing = _carImageDal.Get(c => c.Id == carImage.Id)
+            ?? throw new NotFoundException(Messages.CarImageNotFound);
 
         carImage.ImagePath = _imageStorage.Replace(file, existing.ImagePath);
         carImage.Date = _timeProvider.GetLocalNow().DateTime;
 
         _carImageDal.Update(carImage);
-
-        return new SuccessResult();
     }
 
     [TransactionScopeAspect]
-    public IResult Delete(CarImage carImage)
+    public void Delete(CarImage carImage)
     {
         _carImageDal.Delete(carImage);
 
         _imageStorage.Delete(carImage.ImagePath);
-
-        return new SuccessResult();
     }
 
-    public IDataResult<List<CarImage>> GetAll()
+    public List<CarImage> GetAll()
     {
-        return new SuccessDataResult<List<CarImage>>(_carImageDal.GetAll());
+        return _carImageDal.GetAll();
     }
 
-    public IDataResult<List<CarImage>> GetByCarId(int carId)
+    public List<CarImage> GetByCarId(int carId)
     {
-        return new SuccessDataResult<List<CarImage>>(_carImageDal.GetAll(c => c.CarId == carId));
+        return _carImageDal.GetAll(c => c.CarId == carId);
     }
 
-    public IDataResult<CarImage> GetById(int id)
+    public CarImage GetById(int id)
     {
-        return new SuccessDataResult<CarImage>(_carImageDal.Get(p => p.Id == id));
+        return _carImageDal.Get(p => p.Id == id);
     }
 
-    private IResult CheckIfReachCarImageLimit(int carId)
+    private void EnsureCarImageLimitNotReached(int carId)
     {
         var countOfCarImages = _carImageDal.GetAll(c => c.CarId == carId).Count;
-        if (!(countOfCarImages > 5))
+        if (countOfCarImages > 5)
         {
-            return new SuccessResult();
+            throw new BusinessRuleException(Messages.CarImageLimitReached);
         }
-        return new ErrorResult(Messages.CarImageLimitReached);
     }
 
-    private static IResult CheckIfImageFileValid(FileUpload file, bool allowMissing)
+    private static void EnsureImageFileIsValid(FileUpload file, bool allowMissing)
     {
         // Adding without a file falls back to the default image.
         if (file == null && allowMissing)
         {
-            return new SuccessResult();
+            return;
         }
 
-        if (ImageFileValidator.IsSupportedImage(file))
+        if (!ImageFileValidator.IsSupportedImage(file))
         {
-            return new SuccessResult();
+            throw new BusinessRuleException(Messages.CarImageInvalidFile);
         }
-        return new ErrorResult(Messages.CarImageInvalidFile);
     }
 }

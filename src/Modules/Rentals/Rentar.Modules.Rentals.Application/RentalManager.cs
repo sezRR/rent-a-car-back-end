@@ -3,7 +3,7 @@ using Rentar.Modules.Fleet.Contracts;
 using Rentar.Modules.Identity.Contracts;
 using Rentar.Modules.Rentals.Domain;
 using Rentar.Shared.Application.Aspects.Validation;
-using Rentar.Shared.Kernel.Results;
+using Rentar.Shared.Kernel.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,49 +24,41 @@ public class RentalManager(
     private readonly TimeProvider _timeProvider = timeProvider;
 
     [ValidationAspect(typeof(RentalValidator))]
-    public IResult Add(Rental rental)
+    public void Add(Rental rental)
     {
         _rentalDal.Add(rental);
-
-        return new SuccessResult(Messages.RentalAdded);
     }
 
-    public IResult Delete(Rental rental)
+    public void Delete(Rental rental)
     {
-        if (rental.CarId.ToString() == null)
-        {
-            return new ErrorResult(Messages.CarIsInvalid);
-        }
         _rentalDal.Delete(rental);
-
-        return new SuccessResult(Messages.RentalDeleted);
     }
 
-    public IDataResult<List<Rental>> GetAll()
+    public List<Rental> GetAll()
     {
-        return new SuccessDataResult<List<Rental>>(_rentalDal.GetAll(), Messages.RentalsListed);
+        return _rentalDal.GetAll();
     }
 
-    public IDataResult<Rental> GetById(int id)
+    public Rental GetById(int id)
     {
-        return new SuccessDataResult<Rental>(_rentalDal.Get(r => r.Id == id));
+        return _rentalDal.Get(r => r.Id == id);
     }
 
-    public IDataResult<List<Rental>> GetRentalsByCarId(int carId)
+    public List<Rental> GetRentalsByCarId(int carId)
     {
-        return new SuccessDataResult<List<Rental>>(_rentalDal.GetAll(r => r.CarId == carId), Messages.RentalsListed);
+        return _rentalDal.GetAll(r => r.CarId == carId);
     }
 
-    public IDataResult<Rental> GetRentalByCarId(int carId)
+    public Rental GetRentalByCarId(int carId)
     {
-        return new SuccessDataResult<Rental>(_rentalDal.Get(r => r.CarId == carId));
+        return _rentalDal.Get(r => r.CarId == carId);
     }
 
-    public IDataResult<List<RentalDetailDto>> GetRentalDetails()
+    public List<RentalDetailDto> GetRentalDetails()
     {
         if (_timeProvider.GetLocalNow().Hour == 22)
         {
-            return new ErrorDataResult<List<RentalDetailDto>>(Messages.MaintenanceTime);
+            throw new UnavailableException(Messages.MaintenanceTime);
         }
 
         var rentals = _rentalDal.GetAll();
@@ -106,29 +98,17 @@ public class RentalManager(
             });
         }
 
-        return new SuccessDataResult<List<RentalDetailDto>>(details);
+        return details;
     }
 
-    public IResult IsRentable(Rental rental)
+    public bool IsRentable(Rental rental)
     {
-        var result = _rentalDal.GetAll(r => r.CarId == rental.CarId);
-
-        if (result.Any(r =>
-            r.ReturnDate >= rental.RentDate &&
-            r.RentDate <= rental.ReturnDate
-        )) return new ErrorResult(Messages.CarNotAvailable);
-
-        return new SuccessResult();
+        return !_rentalDal.GetAll(r => r.CarId == rental.CarId)
+            .Any(r => r.ReturnDate >= rental.RentDate && r.RentDate <= rental.ReturnDate);
     }
 
-    public IResult Update(Rental rental)
+    public void Update(Rental rental)
     {
-        if (rental.CarId.ToString() == null)
-        {
-            return new ErrorResult(Messages.CarIsInvalid);
-        }
         _rentalDal.Update(rental);
-
-        return new SuccessResult(Messages.RentalUpdated);
     }
 }

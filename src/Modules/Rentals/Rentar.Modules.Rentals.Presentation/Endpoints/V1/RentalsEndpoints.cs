@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Rentals.Application;
 using Rentar.Modules.Rentals.Domain;
 using Rentar.Shared.Presentation.Endpoints;
+using System.Collections.Generic;
 
 namespace Rentar.Modules.Rentals.Presentation.Endpoints.V1;
 
@@ -20,33 +22,31 @@ public class RentalsEndpoints : IEndpoint
         group.MapPost("/add", Add);
     }
 
-    private static IResult GetAll(IRentalService rentalService)
+    private static Ok<V1Response<List<Rental>>> GetAll(IRentalService rentalService)
     {
-        var result = rentalService.GetAll();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(rentalService.GetAll(), Messages.RentalsListed);
     }
 
-    private static IResult GetRentalByCarId(IRentalService rentalService, int carId)
+    private static Ok<V1Response<Rental>> GetRentalByCarId(IRentalService rentalService, int carId)
     {
-        var result = rentalService.GetRentalByCarId(carId);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(rentalService.GetRentalByCarId(carId), null);
     }
 
-    private static IResult GetRentalDetails(IRentalService rentalService)
+    private static Ok<V1Response<List<RentalDetailDto>>> GetRentalDetails(IRentalService rentalService)
     {
-        var result = rentalService.GetRentalDetails();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(rentalService.GetRentalDetails(), null);
     }
 
-    private static IResult IsRentable(IRentalService rentalService, Rental rental)
+    private static Results<Ok<V1Response>, BadRequest<V1Response>> IsRentable(IRentalService rentalService, Rental rental)
     {
-        var result = rentalService.IsRentable(rental);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return rentalService.IsRentable(rental)
+            ? V1Results.Ok(null)
+            : V1Results.Fail(Messages.CarNotAvailable);
     }
 
-    private static IResult Add(IRentalService rentalService, Rental rental)
+    private static Ok<V1Response> Add(IRentalService rentalService, Rental rental)
     {
-        var result = rentalService.Add(rental);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        rentalService.Add(rental);
+        return V1Results.Ok(Messages.RentalAdded);
     }
 }

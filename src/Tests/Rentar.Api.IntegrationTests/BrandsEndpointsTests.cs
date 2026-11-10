@@ -1,5 +1,5 @@
 using Rentar.Shared.Presentation.Errors;
-using Rentar.Shared.Kernel.Results;
+using Rentar.Shared.Presentation.Endpoints;
 using Rentar.Modules.Fleet.Domain;
 using System.Collections.Generic;
 using System.Net;
@@ -16,12 +16,12 @@ public class BrandsEndpointsTests(RentarApiFactory factory) : IntegrationTestBas
         var response = await Client.PostJsonAsync("/api/v1/brands/add", new Brand { BrandName = "Toyota" });
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var added = await response.ReadAsAsync<Result>();
+        var added = await response.ReadAsAsync<V1Response>();
         Assert.True(added.Success);
         Assert.Equal("Brand Added", added.Message);
 
         var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
-        var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
+        var listed = await brands.ReadAsAsync<V1Response<List<Brand>>>();
 
         Assert.True(listed.Success);
         var brand = Assert.Single(listed.Data);
@@ -37,7 +37,7 @@ public class BrandsEndpointsTests(RentarApiFactory factory) : IntegrationTestBas
         var id = await GetBrandIdAsync("Renault");
 
         var response = await Client.GetJsonAsync($"/api/v1/brands/getbyid?id={id}");
-        var result = await response.ReadAsAsync<DataResult<Brand>>();
+        var result = await response.ReadAsAsync<V1Response<Brand>>();
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("Renault", result.Data.BrandName);
@@ -53,7 +53,7 @@ public class BrandsEndpointsTests(RentarApiFactory factory) : IntegrationTestBas
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var updated = await Client.GetJsonAsync($"/api/v1/brands/getbyid?id={id}");
-        var result = await updated.ReadAsAsync<DataResult<Brand>>();
+        var result = await updated.ReadAsAsync<V1Response<Brand>>();
 
         Assert.Equal("Opel", result.Data.BrandName);
     }
@@ -68,7 +68,7 @@ public class BrandsEndpointsTests(RentarApiFactory factory) : IntegrationTestBas
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
-        var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
+        var listed = await brands.ReadAsAsync<V1Response<List<Brand>>>();
 
         Assert.Empty(listed.Data);
     }
@@ -85,14 +85,14 @@ public class BrandsEndpointsTests(RentarApiFactory factory) : IntegrationTestBas
         Assert.Contains(error.Errors, e => e.PropertyName == "BrandName");
 
         var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
-        var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
+        var listed = await brands.ReadAsAsync<V1Response<List<Brand>>>();
         Assert.Empty(listed.Data);
     }
 
     private async Task<int> GetBrandIdAsync(string brandName)
     {
         var brands = await Client.GetJsonAsync("/api/v1/brands/getall");
-        var listed = await brands.ReadAsAsync<DataResult<List<Brand>>>();
+        var listed = await brands.ReadAsAsync<V1Response<List<Brand>>>();
 
         return listed.Data.Find(b => b.BrandName == brandName).Id;
     }

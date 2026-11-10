@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
-using Rentar.Modules.Identity.Application;
 using Rentar.Modules.Identity.Application.Auth;
 using Rentar.Modules.Identity.Application.Users;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
-using KernelResult = Rentar.Shared.Kernel.Results.IResult;
 
 namespace Rentar.Modules.Identity.Presentation.Endpoints.V2;
 
@@ -31,15 +29,13 @@ public class UsersEndpoints : IEndpoint
 
     /// <summary>
     /// Lists users, optionally only the one with an email and/or those with at least a Findeks rating.
+    /// The full list is closed during the 22:00 maintenance hour.
     /// </summary>
-    private static Results<Ok<List<UserResponse>>, ProblemHttpResult> GetAll(
-        IUserService userService,
-        string? email,
-        int? minFindeksRating)
+    private static Ok<List<UserResponse>> GetAll(IUserService userService, string? email, int? minFindeksRating)
     {
         if (email is not null)
         {
-            var user = userService.GetUserByMail(email).Data;
+            var user = userService.GetByMail(email);
             var matches = new List<UserResponse>();
 
             if (user is not null && user.FindeksRating >= (minFindeksRating ?? int.MinValue))
@@ -50,33 +46,25 @@ public class UsersEndpoints : IEndpoint
             return TypedResults.Ok(matches);
         }
 
-        var result = minFindeksRating is { } rating
+        var users = minFindeksRating is { } rating
             ? userService.GetUserFindeksRating(rating)
             : userService.GetAll();
 
-        return result.Success ? TypedResults.Ok(result.Data.ConvertAll(UserResponse.From)) : Problem(result);
+        return TypedResults.Ok(users.ConvertAll(UserResponse.From));
     }
 
     private static Results<Ok<UserResponse>, ProblemHttpResult> GetById(IUserService userService, int id)
     {
-        var user = userService.GetUserById(id).Data;
+        var user = userService.GetById(id);
         return user is null ? RestResults.NotFound("User", id) : TypedResults.Ok(UserResponse.From(user));
     }
 
     /// <summary>
-    /// Creates an account. Log in through <c>POST /auth/tokens</c> to get an access token for it.
+    /// Creates an account; an email that is already registered answers 409. Log in through
+    /// <c>POST /auth/tokens</c> to get an access token for it.
     /// </summary>
-    private static Results<Created<UserResponse>, ProblemHttpResult> Create(
-        IAuthService authService,
-        HttpRequest request,
-        UserRequest body)
+    private static Created<UserResponse> Create(IAuthService authService, HttpRequest request, UserRequest body)
     {
-        var userExists = authService.UserExists(body.Email);
-        if (!userExists.Success)
-        {
-            return RestResults.Problem(userExists, StatusCodes.Status409Conflict);
-        }
-
         var registration = new UserForRegisterDto
         {
             FirstName = body.FirstName,
@@ -86,20 +74,18 @@ public class UsersEndpoints : IEndpoint
             FindeksRating = body.FindeksRating
         };
 
-        var result = authService.Register(registration, body.Password);
-        return result.Success
-            ? RestResults.Created(request, result.Data.Id, UserResponse.From(result.Data))
-            : RestResults.Problem(result);
+        var user = authService.Register(registration, body.Password);
+        return RestResults.Created(request, user.Id, UserResponse.From(user));
     }
 
     private static Results<NoContent, ProblemHttpResult> Update(IUserService userService, int id, UserRequest body)
     {
-        if (userService.GetUserById(id).Data is null)
+        if (userService.GetById(id) is null)
         {
             return RestResults.NotFound("User", id);
         }
 
-        var result = userService.Update(new UserForUpdateDto
+        userService.Update(new UserForUpdateDto
         {
             Id = id,
             FirstName = body.FirstName,
@@ -109,16 +95,6 @@ public class UsersEndpoints : IEndpoint
             FindeksRating = body.FindeksRating
         });
 
-        return result.Success ? TypedResults.NoContent() : RestResults.Problem(result);
-    }
-
-    /// <summary>
-    /// The user list is closed during the 22:00 maintenance hour, which is a temporary outage rather than a bad request.
-    /// </summary>
-    private static ProblemHttpResult Problem(KernelResult result)
-    {
-        return RestResults.Problem(result, result.Message == Messages.MaintenanceTime
-            ? StatusCodes.Status503ServiceUnavailable
-            : StatusCodes.Status400BadRequest);
+        return TypedResults.NoContent();
     }
 }

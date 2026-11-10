@@ -1,13 +1,16 @@
 using Rentar.Modules.Identity.Domain;
-using Rentar.Shared.Kernel.Results;
 
 namespace Rentar.Modules.Identity.Application.Auth;
 
 public interface IAuthService
 {
-    IDataResult<User> Register(UserForRegisterDto userForRegisterDto, string password);
-    IDataResult<User> Login(UserForLoginDto userForLoginDto);
-    IDataResult<AccessToken> CreateAccessToken(User user);
+    /// <summary>Creates the user with a salted hash of <paramref name="password"/>.</summary>
+    /// <exception cref="Rentar.Shared.Kernel.Exceptions.ConflictException">A user with that email already exists.</exception>
+    User Register(UserForRegisterDto userForRegisterDto, string password);
 
-    IResult UserExists(string email);
+    /// <returns>The user the credentials belong to.</returns>
+    /// <exception cref="Rentar.Shared.Kernel.Exceptions.InvalidCredentialsException">No user has that email, or the password is wrong.</exception>
+    User Login(UserForLoginDto userForLoginDto);
+
+    AccessToken CreateAccessToken(User user);
 }

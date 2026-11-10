@@ -1,15 +1,16 @@
 using Rentar.Modules.Fleet.Domain;
-using Rentar.Shared.Kernel.Results;
 using System.Collections.Generic;
 
 namespace Rentar.Modules.Fleet.Application.Brands;
 
 public interface IBrandService
 {
-    IDataResult<List<Brand>> GetAll();
-    IDataResult<Brand> GetById(int brandId);
+    List<Brand> GetAll();
 
-    IResult Add(Brand brand);
-    IResult Update(Brand brand);
-    IResult Delete(Brand brand);
+    /// <returns>The brand, or <c>null</c> when there is none with that id.</returns>
+    Brand GetById(int brandId);
+
+    void Add(Brand brand);
+    void Update(Brand brand);
+    void Delete(Brand brand);
 }

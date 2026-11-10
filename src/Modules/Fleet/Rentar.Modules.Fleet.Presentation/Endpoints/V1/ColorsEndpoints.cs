@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Rentar.Modules.Fleet.Application;
 using Rentar.Modules.Fleet.Application.Colors;
 using Rentar.Modules.Fleet.Domain;
 using Rentar.Shared.Presentation.Endpoints;
+using System.Collections.Generic;
 
 namespace Rentar.Modules.Fleet.Presentation.Endpoints.V1;
 
@@ -20,33 +22,31 @@ public class ColorsEndpoints : IEndpoint
         group.MapPost("/delete", Delete);
     }
 
-    private static IResult GetAll(IColorService colorService)
+    private static Ok<V1Response<List<Color>>> GetAll(IColorService colorService)
     {
-        var result = colorService.GetAll();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(colorService.GetAll(), Messages.ColorsListed);
     }
 
-    private static IResult GetById(IColorService colorService, int id)
+    private static Ok<V1Response<Color>> GetById(IColorService colorService, int id)
     {
-        var result = colorService.GetById(id);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(colorService.GetById(id), null);
     }
 
-    private static IResult Add(IColorService colorService, Color color)
+    private static Ok<V1Response> Add(IColorService colorService, Color color)
     {
-        var result = colorService.Add(color);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        colorService.Add(color);
+        return V1Results.Ok(Messages.ColorAdded);
     }
 
-    private static IResult Update(IColorService colorService, Color color)
+    private static Ok<V1Response> Update(IColorService colorService, Color color)
     {
-        var result = colorService.Update(color);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        colorService.Update(color);
+        return V1Results.Ok(Messages.ColorUpdated);
     }
 
-    private static IResult Delete(IColorService colorService, Color color)
+    private static Ok<V1Response> Delete(IColorService colorService, Color color)
     {
-        var result = colorService.Delete(color);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        colorService.Delete(color);
+        return V1Results.Ok(Messages.ColorDeleted);
     }
 }

@@ -23,9 +23,8 @@ public class PaymentsEndpoints : IEndpoint
     /// </summary>
     private static Results<NoContent, ProblemHttpResult> Create(IPaymentService paymentService)
     {
-        var result = paymentService.Pay();
-        return result.Success
+        return paymentService.Pay()
             ? TypedResults.NoContent()
-            : RestResults.Problem(result, StatusCodes.Status402PaymentRequired);
+            : TypedResults.Problem(detail: Messages.PaymentFailed, statusCode: StatusCodes.Status402PaymentRequired);
     }
 }

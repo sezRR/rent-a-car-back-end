@@ -40,16 +40,14 @@ public class CarImagesEndpoints : IEndpoint
             .MapGet("/", GetAll);
     }
 
-    private static Results<Ok<List<CarImage>>, ProblemHttpResult> GetAll(ICarImageService carImageService)
+    private static Ok<List<CarImage>> GetAll(ICarImageService carImageService)
     {
-        var result = carImageService.GetAll();
-        return result.Success ? TypedResults.Ok(result.Data) : RestResults.Problem(result);
+        return TypedResults.Ok(carImageService.GetAll());
     }
 
-    private static Results<Ok<List<CarImage>>, ProblemHttpResult> GetByCar(ICarImageService carImageService, int carId)
+    private static Ok<List<CarImage>> GetByCar(ICarImageService carImageService, int carId)
     {
-        var result = carImageService.GetByCarId(carId);
-        return result.Success ? TypedResults.Ok(result.Data) : RestResults.Problem(result);
+        return TypedResults.Ok(carImageService.GetByCarId(carId));
     }
 
     private static Results<Ok<CarImage>, ProblemHttpResult> GetById(ICarImageService carImageService, int carId, int imageId)
@@ -61,7 +59,7 @@ public class CarImagesEndpoints : IEndpoint
     /// <summary>
     /// Stores a PNG or JPEG sent as the <c>file</c> form field; without one the car gets the default image.
     /// </summary>
-    private static Results<Created<CarImage>, ProblemHttpResult> Upload(
+    private static Created<CarImage> Upload(
         ICarImageService carImageService,
         [FromServices] TimeProvider timeProvider,
         HttpRequest request,
@@ -70,8 +68,8 @@ public class CarImagesEndpoints : IEndpoint
     {
         var carImage = new CarImage { CarId = carId, Date = timeProvider.GetLocalNow().DateTime };
 
-        var result = carImageService.Add(carImage, ToUpload(file));
-        return result.Success ? RestResults.Created(request, carImage.Id, carImage) : RestResults.Problem(result);
+        carImageService.Add(carImage, ToUpload(file));
+        return RestResults.Created(request, carImage.Id, carImage);
     }
 
     /// <summary>
@@ -88,8 +86,8 @@ public class CarImagesEndpoints : IEndpoint
             return RestResults.NotFound("Car image", imageId);
         }
 
-        var result = carImageService.Update(new CarImage { Id = imageId, CarId = carId }, ToUpload(file));
-        return result.Success ? TypedResults.NoContent() : RestResults.Problem(result);
+        carImageService.Update(new CarImage { Id = imageId, CarId = carId }, ToUpload(file));
+        return TypedResults.NoContent();
     }
 
     private static Results<NoContent, ProblemHttpResult> Delete(ICarImageService carImageService, int carId, int imageId)
@@ -100,22 +98,18 @@ public class CarImagesEndpoints : IEndpoint
             return RestResults.NotFound("Car image", imageId);
         }
 
-        var result = carImageService.Delete(carImage);
-        return result.Success ? TypedResults.NoContent() : RestResults.Problem(result);
+        carImageService.Delete(carImage);
+        return TypedResults.NoContent();
     }
 
     /// <summary>
     /// Deletes every image of the car. A car without images is already in that state, so this also answers 204.
     /// </summary>
-    private static Results<NoContent, ProblemHttpResult> DeleteAll(ICarImageService carImageService, int carId)
+    private static NoContent DeleteAll(ICarImageService carImageService, int carId)
     {
-        foreach (var carImage in carImageService.GetByCarId(carId).Data)
+        foreach (var carImage in carImageService.GetByCarId(carId))
         {
-            var result = carImageService.Delete(carImage);
-            if (!result.Success)
-            {
-                return RestResults.Problem(result);
-            }
+            carImageService.Delete(carImage);
         }
 
         return TypedResults.NoContent();
@@ -126,7 +120,7 @@ public class CarImagesEndpoints : IEndpoint
     /// </summary>
     private static CarImage? Find(ICarImageService carImageService, int carId, int imageId)
     {
-        var carImage = carImageService.GetById(imageId).Data;
+        var carImage = carImageService.GetById(imageId);
         return carImage?.CarId == carId ? carImage : null;
     }
 

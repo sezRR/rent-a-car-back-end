@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Fleet.Application.CarImages;
@@ -7,7 +8,6 @@ using Rentar.Modules.Fleet.Domain;
 using Rentar.Shared.Presentation.Endpoints;
 using System;
 using System.Collections.Generic;
-using KernelResult = Rentar.Shared.Kernel.Results.IResult;
 
 namespace Rentar.Modules.Fleet.Presentation.Endpoints.V1;
 
@@ -25,69 +25,59 @@ public class CarImagesEndpoints : IEndpoint
         group.MapDelete("/delete", Delete);
     }
 
-    private static IResult GetAll(ICarImageService carImageService)
+    private static Ok<V1Response<List<CarImage>>> GetAll(ICarImageService carImageService)
     {
-        var result = carImageService.GetAll();
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carImageService.GetAll(), null);
     }
 
-    private static IResult GetById(ICarImageService carImageService, int id)
+    private static Ok<V1Response<CarImage>> GetById(ICarImageService carImageService, int id)
     {
-        var result = carImageService.GetById(id);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carImageService.GetById(id), null);
     }
 
-    private static IResult GetByCarId(ICarImageService carImageService, int carId)
+    private static Ok<V1Response<List<CarImage>>> GetByCarId(ICarImageService carImageService, int carId)
     {
-        var result = carImageService.GetByCarId(carId);
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        return V1Results.Ok(carImageService.GetByCarId(carId), null);
     }
 
-    private static IResult Add(
+    private static Ok<V1Response> Add(
         ICarImageService carImageService,
         [FromServices] TimeProvider timeProvider,
         [FromForm(Name = "carId")] string carId,
         [FromForm(Name = "file")] IFormFile file)
     {
         var carImage = new CarImage { CarId = Convert.ToInt32(carId), Date = timeProvider.GetLocalNow().DateTime };
-        var result = carImageService.Add(carImage, ToUpload(file));
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        carImageService.Add(carImage, ToUpload(file));
+        return V1Results.Ok(null);
     }
 
-    private static IResult Update(
+    private static Ok<V1Response> Update(
         ICarImageService carImageService,
         [FromForm(Name = "objectFile")] IFormFile objectFile,
         [FromForm(Name = "carImage")] CarImage carImage)
     {
-        var result = carImageService.Update(carImage, ToUpload(objectFile));
-        return result.Success ? Results.Ok(result) : Results.BadRequest(result);
+        carImageService.Update(carImage, ToUpload(objectFile));
+        return V1Results.Ok(null);
     }
 
-    private static IResult Delete(ICarImageService carImageService, int id)
+    /// <summary>
+    /// Despite its name, <paramref name="id"/> is a car id: every image of that car is deleted.
+    /// </summary>
+    private static Results<Ok<V1Response>, BadRequest<string>> Delete(ICarImageService carImageService, int id)
     {
-        var carImages = carImageService.GetByCarId(id).Data;
+        var carImages = carImageService.GetByCarId(id);
 
         if (carImages.Count == 0)
         {
-            return Results.BadRequest("This car do not have image!");
+            return TypedResults.BadRequest("This car do not have image!");
         }
-
-        List<KernelResult> results = new();
 
         foreach (var carImage in carImages)
         {
-            results.Add(carImageService.Delete(carImage));
+            carImageService.Delete(carImage);
         }
 
-        foreach (var result in results)
-        {
-            if (!result.Success)
-            {
-                return Results.BadRequest(result);
-            }
-        }
-
-        return Results.Ok(results[0]);
+        return V1Results.Ok(null);
     }
 
     private static FileUpload ToUpload(IFormFile file)

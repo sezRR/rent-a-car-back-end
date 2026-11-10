@@ -1,20 +1,28 @@
 using Rentar.Modules.Rentals.Domain;
-using Rentar.Shared.Kernel.Results;
 using System.Collections.Generic;
 
 namespace Rentar.Modules.Rentals.Application;
 
 public interface IRentalService
 {
-    IDataResult<List<Rental>> GetAll();
-    IDataResult<Rental> GetById(int id);
-    IDataResult<List<Rental>> GetRentalsByCarId(int carId);
+    List<Rental> GetAll();
 
-    IResult Add(Rental rental);
-    IResult Update(Rental rental);
-    IResult Delete(Rental rental);
-    IResult IsRentable(Rental rental);
+    /// <returns>The rental, or <c>null</c> when there is none with that id.</returns>
+    Rental GetById(int id);
 
-    IDataResult<List<RentalDetailDto>> GetRentalDetails();
-    IDataResult<Rental> GetRentalByCarId(int carId);
+    List<Rental> GetRentalsByCarId(int carId);
+
+    void Add(Rental rental);
+    void Update(Rental rental);
+    void Delete(Rental rental);
+
+    /// <summary>Whether the car is free for the whole period, i.e. no rental of it overlaps the period.</summary>
+    bool IsRentable(Rental rental);
+
+    /// <summary>Rentals together with their car, customer and user; a rental whose car, customer or user is gone is left out.</summary>
+    /// <exception cref="Rentar.Shared.Kernel.Exceptions.UnavailableException">It is the 22:00 maintenance hour.</exception>
+    List<RentalDetailDto> GetRentalDetails();
+
+    /// <summary>The car's rental; expects at most one, as v1 does.</summary>
+    Rental GetRentalByCarId(int carId);
 }

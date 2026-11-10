@@ -28,49 +28,45 @@ public class BrandsEndpoints : IEndpoint
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
-    private static Results<Ok<List<Brand>>, ProblemHttpResult> GetAll(IBrandService brandService)
+    private static Ok<List<Brand>> GetAll(IBrandService brandService)
     {
-        var result = brandService.GetAll();
-        return result.Success ? TypedResults.Ok(result.Data) : RestResults.Problem(result);
+        return TypedResults.Ok(brandService.GetAll());
     }
 
     private static Results<Ok<Brand>, ProblemHttpResult> GetById(IBrandService brandService, int id)
     {
-        var brand = brandService.GetById(id).Data;
+        var brand = brandService.GetById(id);
         return brand is null ? RestResults.NotFound("Brand", id) : TypedResults.Ok(brand);
     }
 
-    private static Results<Created<Brand>, ProblemHttpResult> Create(
-        IBrandService brandService,
-        HttpRequest request,
-        BrandRequest body)
+    private static Created<Brand> Create(IBrandService brandService, HttpRequest request, BrandRequest body)
     {
         var brand = new Brand { BrandName = body.BrandName };
 
-        var result = brandService.Add(brand);
-        return result.Success ? RestResults.Created(request, brand.Id, brand) : RestResults.Problem(result);
+        brandService.Add(brand);
+        return RestResults.Created(request, brand.Id, brand);
     }
 
     private static Results<NoContent, ProblemHttpResult> Update(IBrandService brandService, int id, BrandRequest body)
     {
-        if (brandService.GetById(id).Data is null)
+        if (brandService.GetById(id) is null)
         {
             return RestResults.NotFound("Brand", id);
         }
 
-        var result = brandService.Update(new Brand { Id = id, BrandName = body.BrandName });
-        return result.Success ? TypedResults.NoContent() : RestResults.Problem(result);
+        brandService.Update(new Brand { Id = id, BrandName = body.BrandName });
+        return TypedResults.NoContent();
     }
 
     private static Results<NoContent, ProblemHttpResult> Delete(IBrandService brandService, int id)
     {
-        var brand = brandService.GetById(id).Data;
+        var brand = brandService.GetById(id);
         if (brand is null)
         {
             return RestResults.NotFound("Brand", id);
         }
 
-        var result = brandService.Delete(brand);
-        return result.Success ? TypedResults.NoContent() : RestResults.Problem(result);
+        brandService.Delete(brand);
+        return TypedResults.NoContent();
     }
 }

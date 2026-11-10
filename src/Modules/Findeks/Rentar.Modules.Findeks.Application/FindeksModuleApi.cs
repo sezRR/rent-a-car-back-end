@@ -8,6 +8,6 @@ public class FindeksModuleApi(IFindeksService findeksService) : IFindeksModuleAp
 
     public int CalculateFindeksRating()
     {
-        return _findeksService.CalculateFindeksRating().Data;
+        return _findeksService.CalculateFindeksRating();
     }
 }

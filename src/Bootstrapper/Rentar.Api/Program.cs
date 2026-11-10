@@ -34,6 +34,7 @@ IModule[] modules =
 ];
 
 builder.Services.AddSharedInfrastructure();
+builder.Services.AddApiErrorHandling();
 
 foreach (var module in modules)
 {
@@ -79,7 +80,7 @@ if (app.Environment.IsDevelopment())
         .AllowAnonymous();
 }
 
-app.UseCustomExceptionMiddleware();
+app.UseApiErrorHandling();
 
 app.UseCors(cors => cors.WithOrigins("http://localhost:4200").AllowAnyHeader());
 

@@ -20,11 +20,8 @@ public class FindeksEndpoints : IEndpoint
     /// <summary>
     /// Calculates a Findeks rating. Calculating it changes nothing, so it is read with GET.
     /// </summary>
-    private static Results<Ok<FindeksRatingResponse>, ProblemHttpResult> GetRating(IFindeksService findeksService)
+    private static Ok<FindeksRatingResponse> GetRating(IFindeksService findeksService)
     {
-        var result = findeksService.CalculateFindeksRating();
-        return result.Success
-            ? TypedResults.Ok(new FindeksRatingResponse(result.Data))
-            : RestResults.Problem(result);
+        return TypedResults.Ok(new FindeksRatingResponse(findeksService.CalculateFindeksRating()));
     }
 }

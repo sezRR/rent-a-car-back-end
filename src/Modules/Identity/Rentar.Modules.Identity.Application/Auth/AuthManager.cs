@@ -1,7 +1,7 @@
 using Rentar.Modules.Identity.Application.Security;
 using Rentar.Modules.Identity.Application.Users;
 using Rentar.Modules.Identity.Domain;
-using Rentar.Shared.Kernel.Results;
+using Rentar.Shared.Kernel.Exceptions;
 
 namespace Rentar.Modules.Identity.Application.Auth;
 
@@ -10,30 +10,32 @@ public class AuthManager(IUserService userService, ITokenHelper tokenHelper) : I
     private readonly IUserService _userService = userService;
     private readonly ITokenHelper _tokenHelper = tokenHelper;
 
-    public IDataResult<AccessToken> CreateAccessToken(User user)
+    public AccessToken CreateAccessToken(User user)
     {
         var claims = _userService.GetClaims(user);
-        var accessToken = _tokenHelper.CreateToken(user, claims);
-        return new SuccessDataResult<AccessToken>(accessToken, Messages.AccessTokenCreated);
+        return _tokenHelper.CreateToken(user, claims);
     }
 
-    public IDataResult<User> Login(UserForLoginDto userForLoginDto)
+    public User Login(UserForLoginDto userForLoginDto)
     {
-        var userToCheck = _userService.GetByMail(userForLoginDto.Email);
-        if (userToCheck == null)
-        {
-            return new ErrorDataResult<User>(Messages.UserNotFound);
-        }
+        var userToCheck = _userService.GetByMail(userForLoginDto.Email)
+            ?? throw new InvalidCredentialsException(Messages.UserNotFound);
 
         if (!HashingHelper.VerifyPasswordHash(userForLoginDto.Password, userToCheck.PasswordHash, userToCheck.PasswordSalt))
         {
-            return new ErrorDataResult<User>(Messages.PasswordError);
+            throw new InvalidCredentialsException(Messages.PasswordError);
         }
-        return new SuccessDataResult<User>(userToCheck, Messages.SuccessfulLogin);
+
+        return userToCheck;
     }
 
-    public IDataResult<User> Register(UserForRegisterDto userForRegisterDto, string password)
+    public User Register(UserForRegisterDto userForRegisterDto, string password)
     {
+        if (_userService.GetByMail(userForRegisterDto.Email) != null)
+        {
+            throw new ConflictException(Messages.UserAlreadyExists);
+        }
+
         HashingHelper.CreatePasswordHash(password, out var passwordHash, out var passwordSalt);
 
         var user = new User
@@ -48,15 +50,6 @@ public class AuthManager(IUserService userService, ITokenHelper tokenHelper) : I
         };
 
         _userService.Add(user);
-        return new SuccessDataResult<User>(user, Messages.UserRegistered);
-    }
-
-    public IResult UserExists(string email)
-    {
-        if (_userService.GetByMail(email) != null)
-        {
-            return new ErrorResult(Messages.UserAlreadyExists);
-        }
-        return new SuccessResult();
+        return user;
     }
 }

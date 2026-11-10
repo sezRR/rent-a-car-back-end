@@ -20,7 +20,6 @@ public static class HttpClientExtensions
             PropertyNameCaseInsensitive = true
         };
 
-        // options.Converters.Add(new ResultJsonConverterFactory());
         return options;
     }
 
