@@ -16,7 +16,7 @@ public sealed record AddCarImage(int CarId, FileUpload File);
 public sealed class AddCarImageHandler(ICarImageDal carImageDal, IImageStorage imageStorage, TimeProvider timeProvider)
     : ICommandHandler<AddCarImage, CarImage>
 {
-    private const int MaxImagesPerCar = 6;
+    private const int MaxImagesPerCar = 5;
 
     [TransactionScopeAspect]
     public CarImage Handle(AddCarImage command)

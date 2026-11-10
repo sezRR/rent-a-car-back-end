@@ -45,6 +45,22 @@ public class CarImagesEndpointsTests(RentarApiFactory factory) : V2TestBase(fact
         Assert.Equal(IImageStorage.DefaultImageName, (await response.ReadAsAsync<CarImage>()).ImagePath);
     }
 
+    [Fact]
+    public async Task Upload_AllowsFiveImagesPerCar_AndRejectsTheSixth()
+    {
+        var car = await CreateCarAsync();
+
+        for (var image = 1; image <= 5; image++)
+        {
+            Assert.Equal(HttpStatusCode.Created, (await UploadDefaultImageAsync(car.Id)).StatusCode);
+        }
+
+        var sixth = await UploadDefaultImageAsync(car.Id);
+
+        await AssertProblemAsync(sixth, HttpStatusCode.BadRequest, Messages.CarImageLimitReached);
+        Assert.Equal(5, (await ImagesAsync(car.Id)).Count);
+    }
+
     [Theory]
     [InlineData("notes.md")]
     [InlineData("fake.png")]
@@ -157,6 +173,13 @@ public class CarImagesEndpointsTests(RentarApiFactory factory) : V2TestBase(fact
 
         await Client.DeleteResourceAsync($"/api/v2/cars/{car.Id}/images");
         await Client.DeleteResourceAsync($"/api/v2/cars/{otherCar.Id}/images");
+    }
+
+    /// <summary>Uploads without a file, so the car gets the default image and nothing is written to disk.</summary>
+    private async Task<HttpResponseMessage> UploadDefaultImageAsync(int carId)
+    {
+        using var form = new MultipartFormDataContent { { new StringContent("no file"), "note" } };
+        return await Client.PostAsync($"/api/v2/cars/{carId}/images", form, TestContext.Current.CancellationToken);
     }
 
     private async Task<List<CarImage>> ImagesAsync(int carId)
