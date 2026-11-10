@@ -28,6 +28,6 @@ public sealed class RentalsModule : IModule
         builder.RegisterType<EfRentalDal>().As<IRentalDal>().SingleInstance();
         builder.RegisterType<RentalsModuleApi>().As<IRentalsModuleApi>().SingleInstance();
 
-        builder.RegisterAspectService<RentalManager, IRentalService>();
+        builder.RegisterUseCases(typeof(GetRentals).Assembly);
     }
 }

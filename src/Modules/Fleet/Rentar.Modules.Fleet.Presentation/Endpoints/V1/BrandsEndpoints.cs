@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Fleet.Application;
 using Rentar.Modules.Fleet.Application.Brands;
 using Rentar.Modules.Fleet.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -22,31 +23,31 @@ public class BrandsEndpoints : IEndpoint
         group.MapPost("/delete", Delete);
     }
 
-    private static Ok<V1Response<List<Brand>>> GetAll(IBrandService brandService)
+    private static Ok<V1Response<List<Brand>>> GetAll(IQueryHandler<GetBrands, List<Brand>> getBrands)
     {
-        return V1Results.Ok(brandService.GetAll(), Messages.BrandsListed);
+        return V1Results.Ok(getBrands.Handle(new GetBrands()), Messages.BrandsListed);
     }
 
-    private static Ok<V1Response<Brand>> GetById(IBrandService brandService, int id)
+    private static Ok<V1Response<Brand>> GetById(IQueryHandler<GetBrandById, Brand> getBrandById, int id)
     {
-        return V1Results.Ok(brandService.GetById(id), null);
+        return V1Results.Ok(getBrandById.Handle(new GetBrandById(id)), null);
     }
 
-    private static Ok<V1Response> Add(IBrandService brandService, Brand brand)
+    private static Ok<V1Response> Add(ICommandHandler<CreateBrand, Brand> createBrand, CreateBrand command)
     {
-        brandService.Add(brand);
+        createBrand.Handle(command);
         return V1Results.Ok(Messages.BrandAdded);
     }
 
-    private static Ok<V1Response> Update(IBrandService brandService, Brand brand)
+    private static Ok<V1Response> Update(ICommandHandler<UpdateBrand> updateBrand, UpdateBrand command)
     {
-        brandService.Update(brand);
+        updateBrand.Handle(command);
         return V1Results.Ok(Messages.BrandUpdated);
     }
 
-    private static Ok<V1Response> Delete(IBrandService brandService, Brand brand)
+    private static Ok<V1Response> Delete(ICommandHandler<DeleteBrand> deleteBrand, DeleteBrand command)
     {
-        brandService.Delete(brand);
+        deleteBrand.Handle(command);
         return V1Results.Ok(Messages.BrandDeleted);
     }
 }

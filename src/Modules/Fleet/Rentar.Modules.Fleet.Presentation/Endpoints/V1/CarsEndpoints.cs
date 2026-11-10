@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Fleet.Application;
 using Rentar.Modules.Fleet.Application.Cars;
 using Rentar.Modules.Fleet.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -27,56 +28,62 @@ public class CarsEndpoints : IEndpoint
         group.MapPost("/delete", Delete);
     }
 
-    private static Ok<V1Response<List<Car>>> GetAll(ICarService carService)
+    private static Ok<V1Response<List<Car>>> GetAll(IQueryHandler<GetCars, List<Car>> getCars)
     {
-        return V1Results.Ok(carService.GetAll(), Messages.CarsListed);
+        return V1Results.Ok(getCars.Handle(new GetCars()), Messages.CarsListed);
     }
 
-    private static Ok<V1Response<List<CarDetailDto>>> GetCarDetails(ICarService carService)
+    private static Ok<V1Response<List<CarDetailDto>>> GetCarDetails(IQueryHandler<GetCarDetails, List<CarDetailDto>> getCarDetails)
     {
-        return V1Results.Ok(carService.GetCarDetails(), null);
+        return V1Results.Ok(getCarDetails.Handle(new GetCarDetails()), null);
     }
 
-    private static Ok<V1Response<CarDetailDto>> GetCarDetailsById(ICarService carService, int id)
+    private static Ok<V1Response<CarDetailDto>> GetCarDetailsById(IQueryHandler<GetCarDetailsById, CarDetailDto> getCarDetailsById, int id)
     {
-        return V1Results.Ok(carService.GetCarDetailsById(id), null);
+        return V1Results.Ok(getCarDetailsById.Handle(new GetCarDetailsById(id)), null);
     }
 
-    private static Ok<V1Response<List<CarDetailDto>>> GetByBrandId(ICarService carService, int brandId)
+    private static Ok<V1Response<List<CarDetailDto>>> GetByBrandId(IQueryHandler<GetCarsByBrand, List<CarDetailDto>> getCarsByBrand, int brandId)
     {
-        return V1Results.Ok(carService.GetCarsByBrandId(brandId), null);
+        return V1Results.Ok(getCarsByBrand.Handle(new GetCarsByBrand(brandId)), null);
     }
 
-    private static Ok<V1Response<List<CarDetailDto>>> GetByColorId(ICarService carService, int colorId)
+    private static Ok<V1Response<List<CarDetailDto>>> GetByColorId(IQueryHandler<GetCarsByColor, List<CarDetailDto>> getCarsByColor, int colorId)
     {
-        return V1Results.Ok(carService.GetCarsByColorId(colorId), Messages.CarsListed);
+        return V1Results.Ok(getCarsByColor.Handle(new GetCarsByColor(colorId)), Messages.CarsListed);
     }
 
-    private static Ok<V1Response<List<CarDetailDto>>> GetCarsByBrandIdAndColorId(ICarService carService, int brandId, int colorId)
+    private static Ok<V1Response<List<CarDetailDto>>> GetCarsByBrandIdAndColorId(
+        IQueryHandler<GetCarsByBrandAndColor, List<CarDetailDto>> getCarsByBrandAndColor,
+        int brandId,
+        int colorId)
     {
-        return V1Results.Ok(carService.GetCarsByColorAndBrandId(brandId, colorId), null);
+        return V1Results.Ok(getCarsByBrandAndColor.Handle(new GetCarsByBrandAndColor(brandId, colorId)), null);
     }
 
-    private static Ok<V1Response> Add(ICarService carService, Car car)
+    private static Ok<V1Response> Add(ICommandHandler<CreateCar, Car> createCar, CreateCar command)
     {
-        carService.Add(car);
+        createCar.Handle(command);
         return V1Results.Ok(Messages.CarAdded);
     }
 
-    private static Ok<V1Response<Car>> AddReturnableData(ICarService carService, Car car)
+    /// <summary>
+    /// Like <c>add</c>, but answers the stored car.
+    /// </summary>
+    private static Ok<V1Response<Car>> AddReturnableData(ICommandHandler<CreateCar, Car> createCar, CreateCar command)
     {
-        return V1Results.Ok(carService.AddReturnableData(car), null);
+        return V1Results.Ok(createCar.Handle(command), null);
     }
 
-    private static Ok<V1Response> Update(ICarService carService, Car car)
+    private static Ok<V1Response> Update(ICommandHandler<UpdateCar> updateCar, UpdateCar command)
     {
-        carService.Update(car);
+        updateCar.Handle(command);
         return V1Results.Ok(Messages.CarUpdated);
     }
 
-    private static Ok<V1Response> Delete(ICarService carService, Car car)
+    private static Ok<V1Response> Delete(ICommandHandler<DeleteCar> deleteCar, DeleteCar command)
     {
-        carService.Delete(car);
+        deleteCar.Handle(command);
         return V1Results.Ok(Messages.CarDeleted);
     }
 }

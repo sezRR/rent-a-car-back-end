@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Rentals.Application;
 using Rentar.Modules.Rentals.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System;
 using System.Collections.Generic;
@@ -30,18 +31,21 @@ public class RentalsEndpoints : IEndpoint
     /// <summary>
     /// Lists rentals, optionally only those of a car.
     /// </summary>
-    private static Ok<List<Rental>> GetAll(IRentalService rentalService, int? carId)
+    private static Ok<List<Rental>> GetAll(
+        IQueryHandler<GetRentals, List<Rental>> getRentals,
+        IQueryHandler<GetRentalsByCar, List<Rental>> getRentalsByCar,
+        int? carId)
     {
         var rentals = carId is { } car
-            ? rentalService.GetRentalsByCarId(car)
-            : rentalService.GetAll();
+            ? getRentalsByCar.Handle(new GetRentalsByCar(car))
+            : getRentals.Handle(new GetRentals());
 
         return TypedResults.Ok(rentals);
     }
 
-    private static Results<Ok<Rental>, ProblemHttpResult> GetById(IRentalService rentalService, int id)
+    private static Results<Ok<Rental>, ProblemHttpResult> GetById(IQueryHandler<GetRentalById, Rental> getRentalById, int id)
     {
-        var rental = rentalService.GetById(id);
+        var rental = getRentalById.Handle(new GetRentalById(id));
         return rental is null ? RestResults.NotFound("Rental", id) : TypedResults.Ok(rental);
     }
 
@@ -49,32 +53,24 @@ public class RentalsEndpoints : IEndpoint
     /// Rentals together with their car, customer and user; a rental whose car, customer or user is gone is left out.
     /// Closed during the 22:00 maintenance hour.
     /// </summary>
-    private static Ok<List<RentalDetailDto>> GetDetails(IRentalService rentalService)
+    private static Ok<List<RentalDetailDto>> GetDetails(IQueryHandler<GetRentalDetails, List<RentalDetailDto>> getRentalDetails)
     {
-        return TypedResults.Ok(rentalService.GetRentalDetails());
+        return TypedResults.Ok(getRentalDetails.Handle(new GetRentalDetails()));
     }
 
     private static Ok<RentalAvailabilityResponse> GetAvailability(
-        IRentalService rentalService,
+        IQueryHandler<CheckCarAvailability, bool> checkCarAvailability,
         int carId,
         DateTime rentDate,
         DateTime returnDate)
     {
-        var available = rentalService.IsRentable(new Rental { CarId = carId, RentDate = rentDate, ReturnDate = returnDate });
+        var available = checkCarAvailability.Handle(new CheckCarAvailability(carId, rentDate, returnDate));
         return TypedResults.Ok(new RentalAvailabilityResponse(carId, rentDate, returnDate, available));
     }
 
-    private static Created<Rental> Create(IRentalService rentalService, HttpRequest request, RentalRequest body)
+    private static Created<Rental> Create(ICommandHandler<CreateRental, Rental> createRental, HttpRequest request, RentalRequest body)
     {
-        var rental = new Rental
-        {
-            CarId = body.CarId,
-            CustomerId = body.CustomerId,
-            RentDate = body.RentDate,
-            ReturnDate = body.ReturnDate
-        };
-
-        rentalService.Add(rental);
+        var rental = createRental.Handle(new CreateRental(body.CarId, body.CustomerId, body.RentDate, body.ReturnDate));
         return RestResults.Created(request, rental.Id, rental);
     }
 }

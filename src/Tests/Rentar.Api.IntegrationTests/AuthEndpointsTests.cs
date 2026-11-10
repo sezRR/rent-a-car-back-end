@@ -42,11 +42,7 @@ public class AuthEndpointsTests(RentarApiFactory factory) : IntegrationTestBase(
     {
         await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
-        var response = await Client.PostJsonAsync("/api/v1/auth/login", new UserForLoginDto
-        {
-            Email = Email,
-            Password = Password
-        });
+        var response = await Client.PostJsonAsync("/api/v1/auth/login", new VerifyCredentials(Email, Password));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.ReadAsAsync<V1Response<AccessToken>>();
@@ -58,11 +54,7 @@ public class AuthEndpointsTests(RentarApiFactory factory) : IntegrationTestBase(
     {
         await Client.PostJsonAsync("/api/v1/auth/register", NewUser());
 
-        var response = await Client.PostJsonAsync("/api/v1/auth/login", new UserForLoginDto
-        {
-            Email = Email,
-            Password = "wrong-password"
-        });
+        var response = await Client.PostJsonAsync("/api/v1/auth/login", new VerifyCredentials(Email, "wrong-password"));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Contains("Password is wrong", await response.ReadTextAsync());
@@ -71,25 +63,14 @@ public class AuthEndpointsTests(RentarApiFactory factory) : IntegrationTestBase(
     [Fact]
     public async Task Login_WithUnknownEmail_ReturnsBadRequest()
     {
-        var response = await Client.PostJsonAsync("/api/v1/auth/login", new UserForLoginDto
-        {
-            Email = "nobody@example.com",
-            Password = Password
-        });
+        var response = await Client.PostJsonAsync("/api/v1/auth/login", new VerifyCredentials("nobody@example.com", Password));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Contains("User not found", await response.ReadTextAsync());
     }
 
-    private static UserForRegisterDto NewUser()
+    private static RegisterUser NewUser()
     {
-        return new UserForRegisterDto
-        {
-            FirstName = "Sezer",
-            LastName = "Tetik",
-            Email = Email,
-            Password = Password,
-            FindeksRating = 900
-        };
+        return new RegisterUser("Sezer", "Tetik", Email, Password, 900);
     }
 }

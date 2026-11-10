@@ -27,7 +27,8 @@ public class ModuleBoundaryTests
         ["Contracts"] = ["Kernel"],
         ["Domain"] = ["Kernel"],
         ["Application"] = ["Kernel", "Application"],
-        ["Presentation"] = ["Kernel", "Presentation"],
+        // Endpoints call use cases through the handler interfaces in Shared.Application, as they use their own Application.
+        ["Presentation"] = ["Kernel", "Application", "Presentation"],
         ["Infrastructure"] = ["Kernel", "Application", "Infrastructure", "Presentation"]
     };
 

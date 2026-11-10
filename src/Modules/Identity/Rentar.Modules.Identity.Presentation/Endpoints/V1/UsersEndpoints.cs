@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Identity.Application;
 using Rentar.Modules.Identity.Application.Users;
 using Rentar.Modules.Identity.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -23,34 +24,36 @@ public class UsersEndpoints : IEndpoint
         group.MapPost("/update", Update);
     }
 
-    private static Ok<V1Response<List<User>>> GetAll(IUserService userService)
+    private static Ok<V1Response<List<User>>> GetAll(IQueryHandler<GetUsers, List<User>> getUsers)
     {
-        return V1Results.Ok(userService.GetAll(), Messages.UsersListed);
+        return V1Results.Ok(getUsers.Handle(new GetUsers()), Messages.UsersListed);
     }
 
-    private static Ok<V1Response<User>> GetByMail(IUserService userService, string email)
+    private static Ok<V1Response<User>> GetByMail(IQueryHandler<GetUserByEmail, User> getUserByEmail, string email)
     {
-        return V1Results.Ok(userService.GetByMail(email), null);
+        return V1Results.Ok(getUserByEmail.Handle(new GetUserByEmail(email)), null);
     }
 
-    private static Ok<V1Response<List<User>>> GetUserFindeksRating(IUserService userService, int findeksRating)
+    private static Ok<V1Response<List<User>>> GetUserFindeksRating(
+        IQueryHandler<GetUsersByMinFindeksRating, List<User>> getUsersByMinFindeksRating,
+        int findeksRating)
     {
-        return V1Results.Ok(userService.GetUserFindeksRating(findeksRating), null);
+        return V1Results.Ok(getUsersByMinFindeksRating.Handle(new GetUsersByMinFindeksRating(findeksRating)), null);
     }
 
-    private static Ok<V1Response<User>> GetUserById(IUserService userService, int id)
+    private static Ok<V1Response<User>> GetUserById(IQueryHandler<GetUserById, User> getUserById, int id)
     {
-        return V1Results.Ok(userService.GetById(id), null);
+        return V1Results.Ok(getUserById.Handle(new GetUserById(id)), null);
     }
 
-    private static Ok<V1Response> Add(IUserService userService, User user)
+    private static Ok<V1Response> Add(ICommandHandler<AddUser> addUser, AddUser command)
     {
-        userService.Add(user);
+        addUser.Handle(command);
         return V1Results.Ok(Messages.UserAdded);
     }
 
-    private static Ok<V1Response<User>> Update(IUserService userService, UserForUpdateDto userForUpdateDto)
+    private static Ok<V1Response<User>> Update(ICommandHandler<UpdateUser, User> updateUser, UpdateUser command)
     {
-        return V1Results.Ok(userService.Update(userForUpdateDto), Messages.UserUpdated);
+        return V1Results.Ok(updateUser.Handle(command), Messages.UserUpdated);
     }
 }

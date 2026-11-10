@@ -95,14 +95,7 @@ public class RentalsEndpointsTests(RentarApiFactory factory) : IntegrationTestBa
 
     private async Task<int> RegisterUserAsync(string firstName, string email)
     {
-        await Client.PostJsonAsync("/api/v1/auth/register", new UserForRegisterDto
-        {
-            FirstName = firstName,
-            LastName = "Tetik",
-            Email = email,
-            Password = "Passw0rd!",
-            FindeksRating = 900
-        });
+        await Client.PostJsonAsync("/api/v1/auth/register", new RegisterUser(firstName, "Tetik", email, "Passw0rd!", 900));
 
         var response = await Client.GetJsonAsync($"/api/v1/users/getbymail?email={email}");
         return (await response.ReadAsAsync<V1Response<User>>()).Data.Id;

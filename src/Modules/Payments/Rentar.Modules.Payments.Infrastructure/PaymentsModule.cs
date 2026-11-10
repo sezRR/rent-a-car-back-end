@@ -24,6 +24,6 @@ public sealed class PaymentsModule : IModule
     {
         builder.RegisterType<PaymentsModuleApi>().As<IPaymentsModuleApi>().SingleInstance();
 
-        builder.RegisterAspectService<PaymentManager, IPaymentService>();
+        builder.RegisterUseCases(typeof(TakePayment).Assembly);
     }
 }

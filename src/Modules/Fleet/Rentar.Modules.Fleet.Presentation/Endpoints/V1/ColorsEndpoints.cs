@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Fleet.Application;
 using Rentar.Modules.Fleet.Application.Colors;
 using Rentar.Modules.Fleet.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -22,31 +23,31 @@ public class ColorsEndpoints : IEndpoint
         group.MapPost("/delete", Delete);
     }
 
-    private static Ok<V1Response<List<Color>>> GetAll(IColorService colorService)
+    private static Ok<V1Response<List<Color>>> GetAll(IQueryHandler<GetColors, List<Color>> getColors)
     {
-        return V1Results.Ok(colorService.GetAll(), Messages.ColorsListed);
+        return V1Results.Ok(getColors.Handle(new GetColors()), Messages.ColorsListed);
     }
 
-    private static Ok<V1Response<Color>> GetById(IColorService colorService, int id)
+    private static Ok<V1Response<Color>> GetById(IQueryHandler<GetColorById, Color> getColorById, int id)
     {
-        return V1Results.Ok(colorService.GetById(id), null);
+        return V1Results.Ok(getColorById.Handle(new GetColorById(id)), null);
     }
 
-    private static Ok<V1Response> Add(IColorService colorService, Color color)
+    private static Ok<V1Response> Add(ICommandHandler<CreateColor, Color> createColor, CreateColor command)
     {
-        colorService.Add(color);
+        createColor.Handle(command);
         return V1Results.Ok(Messages.ColorAdded);
     }
 
-    private static Ok<V1Response> Update(IColorService colorService, Color color)
+    private static Ok<V1Response> Update(ICommandHandler<UpdateColor> updateColor, UpdateColor command)
     {
-        colorService.Update(color);
+        updateColor.Handle(command);
         return V1Results.Ok(Messages.ColorUpdated);
     }
 
-    private static Ok<V1Response> Delete(IColorService colorService, Color color)
+    private static Ok<V1Response> Delete(ICommandHandler<DeleteColor> deleteColor, DeleteColor command)
     {
-        colorService.Delete(color);
+        deleteColor.Handle(command);
         return V1Results.Ok(Messages.ColorDeleted);
     }
 }

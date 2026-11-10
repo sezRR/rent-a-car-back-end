@@ -28,6 +28,6 @@ public sealed class CustomersModule : IModule
         builder.RegisterType<EfCustomerDal>().As<ICustomerDal>().SingleInstance();
         builder.RegisterType<CustomersModuleApi>().As<ICustomersModuleApi>().SingleInstance();
 
-        builder.RegisterAspectService<CustomerManager, ICustomerService>();
+        builder.RegisterUseCases(typeof(GetCustomers).Assembly);
     }
 }

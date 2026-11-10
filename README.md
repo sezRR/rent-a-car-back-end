@@ -126,13 +126,13 @@ src/
   Bootstrapper/Rentar.Api           host: composes the modules, nothing else
   Shared/
     Rentar.Shared.Kernel            exceptions, entity markers (no dependencies)
-    Rentar.Shared.Application       aspects (validation, caching, transaction, performance, security) + abstractions
+    Rentar.Shared.Application       use case handler interfaces, aspects (validation, caching, transaction, ...)
     Rentar.Shared.Infrastructure    EF repository base, per-module DbContext wiring, cache, IModule
     Rentar.Shared.Presentation      endpoint discovery, versioned route groups, exception handler, v1 envelope
   Modules/<Module>/
     Rentar.Modules.<Module>.Contracts       public API other modules may call
     Rentar.Modules.<Module>.Domain          entities
-    Rentar.Modules.<Module>.Application     services, validators, repository interfaces, contract implementation
+    Rentar.Modules.<Module>.Application     use cases, repository interfaces, contract implementation
     Rentar.Modules.<Module>.Presentation    minimal-API endpoints
     Rentar.Modules.<Module>.Infrastructure  DbContext, migrations, repositories, adapters, module registration
   Tests/
@@ -149,29 +149,58 @@ src/
 
 Every module with state has its own `DbContext`, its own schema and its own `__EFMigrationsHistory` table inside that
 schema, so modules migrate independently. Data in another module is referenced by id only: there are no cross-schema
-foreign keys or joins. For example, rental details are put together by `RentalManager` from the Customers, Identity and
-Fleet contracts.
+foreign keys or joins. For example, rental details are put together by the `GetRentalDetails` use case from the Customers,
+Identity and Fleet contracts.
 
 Boundary rules (checked by `Rentar.ArchitectureTests` on the compiled assemblies):
 
 - Domain uses only the Kernel. Contracts use nothing but the Kernel.
 - Application uses its own Domain and Contracts, `Shared.Application`, and the **Contracts** of other modules - nothing else of theirs.
-- Presentation uses its own Application/Domain and `Shared.Presentation`, never Infrastructure.
+- Presentation uses its own Application/Domain, `Shared.Application` (to call use cases) and `Shared.Presentation`, never Infrastructure.
 - Infrastructure is the module's composition root (`IModule`); it is the only module project the host references.
 - Shared projects never reference a module.
 
 Adding a module: create the five projects, implement `IModule` in its Infrastructure (register its context with
-`AddModuleDbContext<TContext>("<schema>")`), and add it to the `modules` array in `Program.cs`.
+`AddModuleDbContext<TContext>("<schema>")` and its use cases with `RegisterUseCases(<Application assembly>)`), and add
+it to the `modules` array in `Program.cs`.
+
+**Use cases**
+
+Each operation of a module is one use case in its Application project. A use case is one file that holds a record
+describing it, its validator if it has one, and a sealed handler:
+
+```csharp
+public sealed record CreateBrand(string BrandName);
+
+public sealed class CreateBrandValidator : AbstractValidator<CreateBrand> { ... }
+
+public sealed class CreateBrandHandler(IBrandDal brandDal) : ICommandHandler<CreateBrand, Brand>
+{
+    [ValidationAspect(typeof(CreateBrandValidator))]
+    public Brand Handle(CreateBrand command) { ... }
+}
+```
+
+- Commands change state and implement `ICommandHandler<TCommand>`, or `ICommandHandler<TCommand, TResult>` when the
+  caller needs something back (e.g. the created record). Queries only read and implement `IQueryHandler<TQuery, TResult>`.
+- Endpoints and module APIs inject the handler they need, e.g. `ICommandHandler<CreateBrand, Brand>`. There is no mediator.
+- Handlers don't call each other; they use repositories, and endpoints combine use cases where needed (v1 login =
+  `VerifyCredentials` + `CreateAccessToken`).
+- `RegisterUseCases` registers every handler behind a Castle proxy, so aspect attributes on `Handle` run around it.
+- `Rentar.ArchitectureTests` checks that no managers or services are left, that every handler is sealed and named
+  after its record, that every use case has exactly one handler, and that every handler is registered.
 
 <br>
 
 **Cross-cutting**
 
-- Errors: services return plain values and throw the Kernel exceptions (`BusinessRuleException`, `NotFoundException`,
+- Errors: use cases return plain values and throw the Kernel exceptions (`BusinessRuleException`, `NotFoundException`,
   `ConflictException`, `InvalidCredentialsException`, `UnavailableException`) when they refuse a request.
   `ApiExceptionHandler`, an ASP.NET Core `IExceptionHandler`, turns them into problem details for v2 and into the
   `{ success, message, data }` body for v1. `V1ContractTests` pins every v1 response.
-- Aspects via Autofac interceptors: validation (FluentValidation), caching, transaction scope, performance, secured operation
+- Aspects on use case handlers, run by Autofac/Castle interceptors: validation (FluentValidation), caching, transaction
+  scope, performance, secured operation. Cache keys are named after the handler class, e.g.
+  `...Cars.GetCarsByBrandHandler.Handle(GetCarsByBrand { BrandId = 1 })`
 - Security: HMACSHA512 password hashing, JWT access tokens (Identity module)
 - Uploaded car images are stored under `src/Bootstrapper/Rentar.Api/wwwroot/uploads` (`Paths:DefaultCarImagePath`)
 

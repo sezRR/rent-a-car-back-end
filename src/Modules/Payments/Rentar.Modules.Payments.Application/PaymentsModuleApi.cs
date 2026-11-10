@@ -1,13 +1,12 @@
 using Rentar.Modules.Payments.Contracts;
+using Rentar.Shared.Application.UseCases;
 
 namespace Rentar.Modules.Payments.Application;
 
-public class PaymentsModuleApi(IPaymentService paymentService) : IPaymentsModuleApi
+public class PaymentsModuleApi(ICommandHandler<TakePayment, bool> takePayment) : IPaymentsModuleApi
 {
-    private readonly IPaymentService _paymentService = paymentService;
-
     public bool Pay()
     {
-        return _paymentService.Pay();
+        return takePayment.Handle(new TakePayment());
     }
 }

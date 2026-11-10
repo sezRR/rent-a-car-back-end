@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Fleet.Application.Brands;
 using Rentar.Modules.Fleet.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -28,45 +29,49 @@ public class BrandsEndpoints : IEndpoint
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
-    private static Ok<List<Brand>> GetAll(IBrandService brandService)
+    private static Ok<List<Brand>> GetAll(IQueryHandler<GetBrands, List<Brand>> getBrands)
     {
-        return TypedResults.Ok(brandService.GetAll());
+        return TypedResults.Ok(getBrands.Handle(new GetBrands()));
     }
 
-    private static Results<Ok<Brand>, ProblemHttpResult> GetById(IBrandService brandService, int id)
+    private static Results<Ok<Brand>, ProblemHttpResult> GetById(IQueryHandler<GetBrandById, Brand> getBrandById, int id)
     {
-        var brand = brandService.GetById(id);
+        var brand = getBrandById.Handle(new GetBrandById(id));
         return brand is null ? RestResults.NotFound("Brand", id) : TypedResults.Ok(brand);
     }
 
-    private static Created<Brand> Create(IBrandService brandService, HttpRequest request, BrandRequest body)
+    private static Created<Brand> Create(ICommandHandler<CreateBrand, Brand> createBrand, HttpRequest request, BrandRequest body)
     {
-        var brand = new Brand { BrandName = body.BrandName };
-
-        brandService.Add(brand);
+        var brand = createBrand.Handle(new CreateBrand(body.BrandName));
         return RestResults.Created(request, brand.Id, brand);
     }
 
-    private static Results<NoContent, ProblemHttpResult> Update(IBrandService brandService, int id, BrandRequest body)
+    private static Results<NoContent, ProblemHttpResult> Update(
+        IQueryHandler<GetBrandById, Brand> getBrandById,
+        ICommandHandler<UpdateBrand> updateBrand,
+        int id,
+        BrandRequest body)
     {
-        if (brandService.GetById(id) is null)
+        if (getBrandById.Handle(new GetBrandById(id)) is null)
         {
             return RestResults.NotFound("Brand", id);
         }
 
-        brandService.Update(new Brand { Id = id, BrandName = body.BrandName });
+        updateBrand.Handle(new UpdateBrand(id, body.BrandName));
         return TypedResults.NoContent();
     }
 
-    private static Results<NoContent, ProblemHttpResult> Delete(IBrandService brandService, int id)
+    private static Results<NoContent, ProblemHttpResult> Delete(
+        IQueryHandler<GetBrandById, Brand> getBrandById,
+        ICommandHandler<DeleteBrand> deleteBrand,
+        int id)
     {
-        var brand = brandService.GetById(id);
-        if (brand is null)
+        if (getBrandById.Handle(new GetBrandById(id)) is null)
         {
             return RestResults.NotFound("Brand", id);
         }
 
-        brandService.Delete(brand);
+        deleteBrand.Handle(new DeleteBrand(id));
         return TypedResults.NoContent();
     }
 }

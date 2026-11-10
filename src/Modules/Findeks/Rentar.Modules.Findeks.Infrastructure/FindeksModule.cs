@@ -24,6 +24,6 @@ public sealed class FindeksModule : IModule
     {
         builder.RegisterType<FindeksModuleApi>().As<IFindeksModuleApi>().SingleInstance();
 
-        builder.RegisterAspectService<FindeksManager, IFindeksService>();
+        builder.RegisterUseCases(typeof(CalculateFindeksRating).Assembly);
     }
 }

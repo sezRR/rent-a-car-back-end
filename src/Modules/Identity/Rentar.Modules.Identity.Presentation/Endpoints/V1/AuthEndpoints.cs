@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Identity.Application;
 using Rentar.Modules.Identity.Application.Auth;
 using Rentar.Modules.Identity.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Kernel.Exceptions;
 using Rentar.Shared.Presentation.Endpoints;
 
@@ -24,12 +25,15 @@ public class AuthEndpoints : IEndpoint
     /// <summary>
     /// Bad credentials answer the reason as a bare string, not the usual v1 body; v1 clients rely on that.
     /// </summary>
-    private static Results<Ok<V1Response<AccessToken>>, BadRequest<string>> Login(IAuthService authService, UserForLoginDto userForLoginDto)
+    private static Results<Ok<V1Response<AccessToken>>, BadRequest<string>> Login(
+        IQueryHandler<VerifyCredentials, User> verifyCredentials,
+        ICommandHandler<CreateAccessToken, AccessToken> createAccessToken,
+        VerifyCredentials credentials)
     {
         try
         {
-            var user = authService.Login(userForLoginDto);
-            return V1Results.Ok(authService.CreateAccessToken(user), Messages.AccessTokenCreated);
+            var user = verifyCredentials.Handle(credentials);
+            return V1Results.Ok(createAccessToken.Handle(new CreateAccessToken(user)), Messages.AccessTokenCreated);
         }
         catch (InvalidCredentialsException e)
         {
@@ -37,11 +41,13 @@ public class AuthEndpoints : IEndpoint
         }
     }
 
-    private static Results<Ok<V1Response<User>>, BadRequest<string>> CheckPassword(IAuthService authService, UserForLoginDto userForLoginDto)
+    private static Results<Ok<V1Response<User>>, BadRequest<string>> CheckPassword(
+        IQueryHandler<VerifyCredentials, User> verifyCredentials,
+        VerifyCredentials credentials)
     {
         try
         {
-            return V1Results.Ok(authService.Login(userForLoginDto), Messages.SuccessfulLogin);
+            return V1Results.Ok(verifyCredentials.Handle(credentials), Messages.SuccessfulLogin);
         }
         catch (InvalidCredentialsException e)
         {
@@ -49,9 +55,12 @@ public class AuthEndpoints : IEndpoint
         }
     }
 
-    private static Ok<V1Response<AccessToken>> Register(IAuthService authService, UserForRegisterDto userForRegisterDto)
+    private static Ok<V1Response<AccessToken>> Register(
+        ICommandHandler<RegisterUser, User> registerUser,
+        ICommandHandler<CreateAccessToken, AccessToken> createAccessToken,
+        RegisterUser registration)
     {
-        var user = authService.Register(userForRegisterDto, userForRegisterDto.Password);
-        return V1Results.Ok(authService.CreateAccessToken(user), Messages.AccessTokenCreated);
+        var user = registerUser.Handle(registration);
+        return V1Results.Ok(createAccessToken.Handle(new CreateAccessToken(user)), Messages.AccessTokenCreated);
     }
 }

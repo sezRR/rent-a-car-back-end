@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Customers.Application;
 using Rentar.Modules.Customers.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -27,26 +28,30 @@ public class CustomersEndpoints : IEndpoint
     /// <summary>
     /// Lists customers, optionally only those of a user. The full list is closed during the 22:00 maintenance hour.
     /// </summary>
-    private static Ok<List<Customer>> GetAll(ICustomerService customerService, int? userId)
+    private static Ok<List<Customer>> GetAll(
+        IQueryHandler<GetCustomers, List<Customer>> getCustomers,
+        IQueryHandler<GetCustomersByUser, List<Customer>> getCustomersByUser,
+        int? userId)
     {
         var customers = userId is { } user
-            ? customerService.GetCustomersByUserId(user)
-            : customerService.GetAll();
+            ? getCustomersByUser.Handle(new GetCustomersByUser(user))
+            : getCustomers.Handle(new GetCustomers());
 
         return TypedResults.Ok(customers);
     }
 
-    private static Results<Ok<Customer>, ProblemHttpResult> GetById(ICustomerService customerService, int id)
+    private static Results<Ok<Customer>, ProblemHttpResult> GetById(IQueryHandler<GetCustomerById, Customer> getCustomerById, int id)
     {
-        var customer = customerService.GetById(id);
+        var customer = getCustomerById.Handle(new GetCustomerById(id));
         return customer is null ? RestResults.NotFound("Customer", id) : TypedResults.Ok(customer);
     }
 
-    private static Created<Customer> Create(ICustomerService customerService, HttpRequest request, CustomerRequest body)
+    private static Created<Customer> Create(
+        ICommandHandler<CreateCustomer, Customer> createCustomer,
+        HttpRequest request,
+        CustomerRequest body)
     {
-        var customer = new Customer { UserId = body.UserId, CompanyName = body.CompanyName };
-
-        customerService.Add(customer);
+        var customer = createCustomer.Handle(new CreateCustomer(body.UserId, body.CompanyName));
         return RestResults.Created(request, customer.Id, customer);
     }
 }

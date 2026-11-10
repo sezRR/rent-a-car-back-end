@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Fleet.Application.Cars;
 using Rentar.Modules.Fleet.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -28,73 +29,78 @@ public class CarsEndpoints : IEndpoint
     }
 
     /// <summary>
-    /// Lists cars, optionally only those of a brand, a color, or both.
+    /// Lists cars, optionally only those of a brand, a color, or both. Each filter is its own use case.
     /// </summary>
-    private static Ok<List<CarResponse>> GetAll(ICarService carService, int? brandId, int? colorId)
+    private static Ok<List<CarResponse>> GetAll(
+        IQueryHandler<GetCarDetails, List<CarDetailDto>> getCarDetails,
+        IQueryHandler<GetCarsByBrand, List<CarDetailDto>> getCarsByBrand,
+        IQueryHandler<GetCarsByColor, List<CarDetailDto>> getCarsByColor,
+        IQueryHandler<GetCarsByBrandAndColor, List<CarDetailDto>> getCarsByBrandAndColor,
+        int? brandId,
+        int? colorId)
     {
         var cars = (brandId, colorId) switch
         {
-            ({ } brand, { } color) => carService.GetCarsByColorAndBrandId(brand, color),
-            ({ } brand, null) => carService.GetCarsByBrandId(brand),
-            (null, { } color) => carService.GetCarsByColorId(color),
-            _ => carService.GetCarDetails()
+            ({ } brand, { } color) => getCarsByBrandAndColor.Handle(new GetCarsByBrandAndColor(brand, color)),
+            ({ } brand, null) => getCarsByBrand.Handle(new GetCarsByBrand(brand)),
+            (null, { } color) => getCarsByColor.Handle(new GetCarsByColor(color)),
+            _ => getCarDetails.Handle(new GetCarDetails())
         };
 
         return TypedResults.Ok(cars.ConvertAll(CarResponse.From));
     }
 
-    private static Results<Ok<CarResponse>, ProblemHttpResult> GetById(ICarService carService, int id)
+    private static Results<Ok<CarResponse>, ProblemHttpResult> GetById(
+        IQueryHandler<GetCarDetailsById, CarDetailDto> getCarDetailsById,
+        int id)
     {
-        var car = carService.GetCarDetailsById(id);
+        var car = getCarDetailsById.Handle(new GetCarDetailsById(id));
         return car is null ? RestResults.NotFound("Car", id) : TypedResults.Ok(CarResponse.From(car));
     }
 
-    private static Created<CarResponse> Create(ICarService carService, HttpRequest request, CarRequest body)
+    private static Created<CarResponse> Create(
+        ICommandHandler<CreateCar, Car> createCar,
+        IQueryHandler<GetCarDetailsById, CarDetailDto> getCarDetailsById,
+        HttpRequest request,
+        CarRequest body)
     {
-        var car = ToCar(0, body);
-        carService.Add(car);
+        var car = createCar.Handle(new CreateCar(
+            body.BrandId, body.ColorId, body.ModelYear, body.DailyPrice, body.Description, body.MinimumFindeksRating));
 
-        var created = carService.GetCarDetailsById(car.Id);
+        var created = getCarDetailsById.Handle(new GetCarDetailsById(car.Id));
         return RestResults.Created(request, car.Id, created is null ? CarResponse.From(car) : CarResponse.From(created));
     }
 
-    private static Results<NoContent, ProblemHttpResult> Update(ICarService carService, int id, CarRequest body)
+    private static Results<NoContent, ProblemHttpResult> Update(
+        IQueryHandler<GetCarById, Car> getCarById,
+        ICommandHandler<UpdateCar> updateCar,
+        int id,
+        CarRequest body)
     {
-        if (carService.GetById(id) is null)
+        if (getCarById.Handle(new GetCarById(id)) is null)
         {
             return RestResults.NotFound("Car", id);
         }
 
-        carService.Update(ToCar(id, body));
+        updateCar.Handle(new UpdateCar(
+            id, body.BrandId, body.ColorId, body.ModelYear, body.DailyPrice, body.Description, body.MinimumFindeksRating));
         return TypedResults.NoContent();
     }
 
     /// <summary>
     /// Deletes the car together with its images and their files.
     /// </summary>
-    private static Results<NoContent, ProblemHttpResult> Delete(ICarService carService, int id)
+    private static Results<NoContent, ProblemHttpResult> Delete(
+        IQueryHandler<GetCarById, Car> getCarById,
+        ICommandHandler<DeleteCar> deleteCar,
+        int id)
     {
-        var car = carService.GetById(id);
-        if (car is null)
+        if (getCarById.Handle(new GetCarById(id)) is null)
         {
             return RestResults.NotFound("Car", id);
         }
 
-        carService.Delete(car);
+        deleteCar.Handle(new DeleteCar(id));
         return TypedResults.NoContent();
-    }
-
-    private static Car ToCar(int id, CarRequest body)
-    {
-        return new Car
-        {
-            Id = id,
-            BrandId = body.BrandId,
-            ColorId = body.ColorId,
-            ModelYear = body.ModelYear,
-            DailyPrice = body.DailyPrice,
-            Description = body.Description,
-            MinimumFindeksRating = body.MinimumFindeksRating
-        };
     }
 }

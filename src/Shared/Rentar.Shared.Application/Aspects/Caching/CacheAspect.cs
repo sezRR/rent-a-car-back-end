@@ -14,7 +14,9 @@ public class CacheAspect(int duration = 60) : MethodInterception
 
     public override void Intercept(IInvocation invocation)
     {
-        var methodName = $"{invocation.Method.ReflectedType.FullName}.{invocation.Method.Name}";
+        // Keyed by the handler class (e.g. "...Cars.GetCarsByBrandHandler.Handle") rather than the shared handler
+        // interface, so a CacheRemoveAspect pattern can name the use cases it invalidates.
+        var methodName = $"{(invocation.TargetType ?? invocation.Method.ReflectedType).FullName}.{invocation.Method.Name}";
         var arguments = invocation.Arguments.ToList();
         var key = $"{methodName}({string.Join(",", arguments.Select(x => x?.ToString() ?? "<Null>"))})";
         if (_cacheManager.IsAdd(key))

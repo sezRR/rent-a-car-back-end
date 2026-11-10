@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
 using Rentar.Modules.Rentals.Application;
 using Rentar.Modules.Rentals.Domain;
+using Rentar.Shared.Application.UseCases;
 using Rentar.Shared.Presentation.Endpoints;
 using System.Collections.Generic;
 
@@ -22,31 +22,34 @@ public class RentalsEndpoints : IEndpoint
         group.MapPost("/add", Add);
     }
 
-    private static Ok<V1Response<List<Rental>>> GetAll(IRentalService rentalService)
+    private static Ok<V1Response<List<Rental>>> GetAll(IQueryHandler<GetRentals, List<Rental>> getRentals)
     {
-        return V1Results.Ok(rentalService.GetAll(), Messages.RentalsListed);
+        return V1Results.Ok(getRentals.Handle(new GetRentals()), Messages.RentalsListed);
     }
 
-    private static Ok<V1Response<Rental>> GetRentalByCarId(IRentalService rentalService, int carId)
+    private static Ok<V1Response<Rental>> GetRentalByCarId(IQueryHandler<GetRentalByCar, Rental> getRentalByCar, int carId)
     {
-        return V1Results.Ok(rentalService.GetRentalByCarId(carId), null);
+        return V1Results.Ok(getRentalByCar.Handle(new GetRentalByCar(carId)), null);
     }
 
-    private static Ok<V1Response<List<RentalDetailDto>>> GetRentalDetails(IRentalService rentalService)
+    private static Ok<V1Response<List<RentalDetailDto>>> GetRentalDetails(
+        IQueryHandler<GetRentalDetails, List<RentalDetailDto>> getRentalDetails)
     {
-        return V1Results.Ok(rentalService.GetRentalDetails(), null);
+        return V1Results.Ok(getRentalDetails.Handle(new GetRentalDetails()), null);
     }
 
-    private static Results<Ok<V1Response>, BadRequest<V1Response>> IsRentable(IRentalService rentalService, Rental rental)
+    private static Results<Ok<V1Response>, BadRequest<V1Response>> IsRentable(
+        IQueryHandler<CheckCarAvailability, bool> checkCarAvailability,
+        CheckCarAvailability query)
     {
-        return rentalService.IsRentable(rental)
+        return checkCarAvailability.Handle(query)
             ? V1Results.Ok(null)
             : V1Results.Fail(Messages.CarNotAvailable);
     }
 
-    private static Ok<V1Response> Add(IRentalService rentalService, Rental rental)
+    private static Ok<V1Response> Add(ICommandHandler<CreateRental, Rental> createRental, CreateRental command)
     {
-        rentalService.Add(rental);
+        createRental.Handle(command);
         return V1Results.Ok(Messages.RentalAdded);
     }
 }

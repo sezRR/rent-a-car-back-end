@@ -39,9 +39,6 @@ public sealed class FleetModule : IModule
         builder.RegisterType<LocalImageStorage>().As<IImageStorage>().SingleInstance();
         builder.RegisterType<FleetModuleApi>().As<IFleetModuleApi>().SingleInstance();
 
-        builder.RegisterAspectService<BrandManager, IBrandService>();
-        builder.RegisterAspectService<ColorManager, IColorService>();
-        builder.RegisterAspectService<CarManager, ICarService>();
-        builder.RegisterAspectService<CarImageManager, ICarImageService>();
+        builder.RegisterUseCases(typeof(GetBrands).Assembly);
     }
 }

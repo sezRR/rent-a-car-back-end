@@ -53,7 +53,6 @@ public sealed class IdentityModule : IModule
         builder.RegisterType<JwtHelper>().As<ITokenHelper>().SingleInstance();
         builder.RegisterType<IdentityModuleApi>().As<IIdentityModuleApi>().SingleInstance();
 
-        builder.RegisterAspectService<UserManager, IUserService>();
-        builder.RegisterAspectService<AuthManager, IAuthService>();
+        builder.RegisterUseCases(typeof(GetUsers).Assembly);
     }
 }
